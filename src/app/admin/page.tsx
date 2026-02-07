@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ShoppingBag, Image as ImageIcon, Settings, LogOut, Plus, Upload, Save } from "lucide-react";
 
