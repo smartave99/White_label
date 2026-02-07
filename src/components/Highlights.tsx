@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ShoppingBasket, Shirt, Smartphone } from "lucide-react";
 
