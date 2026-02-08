@@ -30,57 +30,56 @@ export default function AdminLoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-brand-sand flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-serif font-bold text-white">
-                        Smart<span className="text-amber-400">Avenue</span>
+                {/* Brand Header */}
+                <div className="text-center mb-10">
+                    <h1 className="text-5xl font-serif text-brand-green mb-2 tracking-tight">
+                        Smart<span className="italic text-brand-gold">Avenue</span>
                     </h1>
-                    <p className="text-slate-400 mt-2">Admin Portal</p>
+                    <p className="text-brand-gray text-sm uppercase tracking-widest">Administration</p>
                 </div>
 
                 {/* Login Card */}
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+                <div className="bg-white border border-gray-100 p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+                    <h2 className="text-2xl font-serif text-brand-dark mb-8 text-center">Welcome Back</h2>
 
                     {error && (
-                        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-300 text-sm">
-                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm text-center">
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-1">
+                            <label className="block text-xs font-medium text-brand-gray uppercase tracking-wider">
                                 Email Address
                             </label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Mail className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
-                                    className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-all"
+                                    placeholder="name@company.com"
+                                    className="w-full pl-8 pr-4 py-3 bg-transparent border-b border-gray-200 text-brand-dark placeholder-gray-300 focus:outline-none focus:border-brand-gold transition-colors rounded-none"
                                     required
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <div className="space-y-1">
+                            <label className="block text-xs font-medium text-brand-gray uppercase tracking-wider">
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Lock className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-all"
+                                    className="w-full pl-8 pr-4 py-3 bg-transparent border-b border-gray-200 text-brand-dark placeholder-gray-300 focus:outline-none focus:border-brand-gold transition-colors rounded-none"
                                     required
                                 />
                             </div>
@@ -89,23 +88,22 @@ export default function AdminLoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-900 font-semibold rounded-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-brand-green text-white font-medium hover:bg-brand-dark transition-colors disabled:opacity-70 flex items-center justify-center gap-2 mt-8 tracking-wide"
                         >
                             {loading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Signing in...
-                                </>
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                "Sign In to Dashboard"
+                                "ACCESS PORTAL"
                             )}
                         </button>
                     </form>
                 </div>
 
-                <p className="text-center text-slate-500 text-sm mt-6">
-                    Authorized personnel only
-                </p>
+                <div className="text-center mt-8">
+                    <p className="text-xs text-brand-gray">
+                        &copy; {new Date().getFullYear()} Smart Avenue Retail. Operations only.
+                    </p>
+                </div>
             </div>
         </div>
     );

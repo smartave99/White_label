@@ -6,11 +6,13 @@
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
   
-  /* Custom Colors */
-  --color-brand-green: #064e3b; /* emerald-900 */
-  --color-brand-gold: #d4af37;
-  --color-brand-gold-light: #f3e5ab;
-  --color-brand-dark: #1a1a1a;
+  /* Custom Colors - Premium International Brand Palette */
+  --color-brand-green: #0F281E; /* Deep Forest Green */
+  --color-brand-gold: #C5A059; /* Muted Champagne Gold */
+  --color-brand-gold-light: #E6C888; /* Pale Gold */
+  --color-brand-dark: #121212; /* Rich Black */
+  --color-brand-sand: #F5F2EA; /* Warm Canvas/Sand */
+  --color-brand-gray: #8E8E8E; /* Neutral Gray */
 }
 
 :root {
