@@ -17,6 +17,9 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Smart Avenue | Premium Retail Experience",
   description: "Patna's Premier Shopping Destination for Fashion, Electronics, and Grocery.",
+  verification: {
+    google: "0c2485eb9747e463",
+  },
 };
 
 export default function RootLayout({
