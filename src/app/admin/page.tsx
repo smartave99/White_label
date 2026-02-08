@@ -1,3 +1,4 @@
+```javascript
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,22 +35,22 @@ const navItems = [
 
 
 export default function AdminDashboard() {
-    const { user, loading: authLoading, logout } = useAuth();
+    const { user, role, loading, logout } = useAuth();
     const router = useRouter();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state
 
     useEffect(() => {
-        if (!authLoading && !user) {
+        if (!loading && !user) {
             router.push("/admin/login");
         }
-    }, [authLoading, user, router]);
+    }, [user, loading, router]);
 
     const handleLogout = async () => {
         await logout();
         router.push("/admin/login");
     };
 
-    if (authLoading) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-brand-sand flex">
                 {/* Skeleton Sidebar */}
@@ -92,7 +93,7 @@ export default function AdminDashboard() {
     };
 
     const role = getRole(user?.email);
-    const dashboardTitle = `${role} Dashboard`;
+    const dashboardTitle = `${ role } Dashboard`;
 
     return (
         <div className="min-h-screen bg-brand-sand flex">
@@ -106,9 +107,9 @@ export default function AdminDashboard() {
 
             {/* Sidebar */}
             <aside className={`
-                fixed lg:static inset-y-0 left-0 z-50 w-72 bg-brand-green transform transition-transform duration-300 ease-in-out
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            `}>
+                fixed lg:static inset - y - 0 left - 0 z - 50 w - 72 bg - brand - green transform transition - transform duration - 300 ease -in -out
+                ${ sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0' }
+`}>
                 <div className="flex flex-col h-full border-r border-white/5">
                     {/* Logo */}
                     <div className="p-8 border-b border-white/5">
@@ -132,15 +133,16 @@ export default function AdminDashboard() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3.5 rounded-none transition-all duration-300 group
-                                        ${isActive
-                                            ? "bg-white/5 text-brand-gold border-r-2 border-brand-gold"
-                                            : "text-gray-400 hover:text-white hover:bg-white/5"
-                                        }
-                                    `}
+                                    className={`flex items - center gap - 3 px - 4 py - 3.5 rounded - none transition - all duration - 300 group
+                                        ${
+    isActive
+        ? "bg-white/5 text-brand-gold border-r-2 border-brand-gold"
+        : "text-gray-400 hover:text-white hover:bg-white/5"
+}
+`}
                                     onClick={() => setSidebarOpen(false)}
                                 >
-                                    <Icon className={`w-5 h-5 ${isActive ? "text-brand-gold" : "text-gray-500 group-hover:text-white"}`} />
+                                    <Icon className={`w - 5 h - 5 ${ isActive ? "text-brand-gold" : "text-gray-500 group-hover:text-white" } `} />
                                     <span className="font-medium tracking-wide text-sm">{item.name}</span>
                                 </Link>
                             );

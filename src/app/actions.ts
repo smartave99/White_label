@@ -258,6 +258,25 @@ export async function deleteStaffMember(id: string) {
     }
 }
 
+// Get staff role by email
+export async function getStaffRole(email: string): Promise<string | null> {
+    try {
+        // Hardcoded super admin
+        if (email === "admin@smartavenue99.com") return "Admin";
+
+        const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
+        if (!snapshot.empty) {
+            const data = snapshot.docs[0].data();
+            // Capitalize first letter for consistency (admin -> Admin)
+            return data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : "Staff";
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching staff role:", error);
+        return null;
+    }
+}
+
 // ==================== CATEGORIES ====================
 
 export interface Category {

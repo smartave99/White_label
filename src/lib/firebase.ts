@@ -15,12 +15,27 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase for SSR compatibility
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app: any;
+let auth: any;
+let db: any;
+let analytics: any;
+let storage: any;
 
-// Initialize Analytics only in the browser
-const analytics = typeof window !== "undefined" ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null;
-const storage = getStorage(app);
+try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    // Initialize Analytics only in the browser
+    analytics = typeof window !== "undefined" ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null;
+    storage = getStorage(app);
+} catch (error) {
+    console.error("Firebase initialization failed:", error);
+    // Provide dummy objects to prevent import crashes, but functional calls will fail
+    app = null;
+    auth = {} as any;
+    db = {} as any;
+    analytics = Promise.resolve(null);
+    storage = {} as any;
+}
 
 export { app, auth, db, analytics, storage };

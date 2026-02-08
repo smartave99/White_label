@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { useContact } from "@/context/contact-context";
 import { getSiteContent, updateSiteContent, ContactContent } from "@/app/actions";
 import {
     Loader2,
@@ -43,25 +44,44 @@ export default function ContactEditor() {
         }
     }, [user]);
 
+    const { refreshContact } = useContact();
+
     const loadContent = async () => {
         setLoading(true);
-        const data = await getSiteContent<ContactContent>("contact");
-        if (data) {
-            setContent({ ...defaultContact, ...data });
+        try {
+            const data = await getSiteContent<ContactContent>("contact");
+            if (data) {
+                setContent({ ...defaultContact, ...data });
+            }
+        } catch (error) {
+            console.error("Failed to load contact content:", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setSaved(false);
-        const result = await updateSiteContent("contact", content as unknown as Record<string, unknown>);
-        if (result.success) {
-            setSaved(true);
-            setTimeout(() => setSaved(false), 3000);
+
+        try {
+            const result = await updateSiteContent("contact", content as unknown as Record<string, unknown>);
+
+            if (result.success) {
+                setSaved(true);
+                // Important: Refresh global contact context so footer updates immediately
+                await refreshContact();
+                setTimeout(() => setSaved(false), 3000);
+            } else {
+                alert("Failed to save changes: " + (result.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error saving contact info:", error);
+            alert("An unexpected error occurred while saving.");
+        } finally {
+            setSaving(false);
         }
-        setSaving(false);
     };
 
     if (authLoading || !user) {

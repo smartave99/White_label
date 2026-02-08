@@ -8,16 +8,23 @@ import {
     signOut
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { getStaffRole } from "@/app/actions";
 
 interface AuthContextType {
     user: User | null;
+    role: string | null;
     loading: boolean;
-    initializing: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+    user: null,
+    role: null,
+    loading: true,
+    login: async () => { },
+    logout: async () => { },
+});
 
 // Persist minimal auth state to localStorage for faster initial render
 const AUTH_STORAGE_KEY = "smart_avenue_auth";
@@ -48,15 +55,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize with persisted state for instant UI
     const [hasPersistedAuth] = useState(() => getPersistedAuth());
     const [user, setUser] = useState<User | null>(null);
+    const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [initializing, setInitializing] = useState(true);
+    const [persistedAuth, setPersistedAuthState] = useState(false); // Renamed to avoid conflict with function
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // Check local storage for persisted auth state to avoid flash of login screen
+        const storedAuth = localStorage.getItem("isAuthenticated");
+        if (storedAuth === "true") {
+            setPersistedAuthState(true);
+        }
+        // Note: setting initializing to false here might conflict with the onAuthStateChanged useEffect
+        // Depending on desired behavior, one of these might need adjustment.
+        // For now, keeping as per instruction.
+        setInitializing(false);
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
+            if (user && user.email) {
+                // Fetch role from server action
+                try {
+                    const userRole = await getStaffRole(user.email);
+                    setRole(userRole || "Staff"); // Default to Staff if found in DB but no role, or null (handled in component)
+                } catch (e) {
+                    console.error("Error fetching role", e);
+                    setRole("Staff");
+                }
+            } else {
+                setRole(null);
+            }
+
             setLoading(false);
             setInitializing(false);
-            setPersistedAuth(!!user);
+            setPersistedAuth(!!user); // Using the global setPersistedAuth function
+            setPersistedAuthState(!!user); // Also updating the local state variable
         });
 
         // Force stop loading after 10 seconds to prevent infinite load
@@ -85,18 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signOut(auth);
     };
 
-    // If we have persisted auth, show UI immediately while Firebase validates
-    const effectiveLoading = hasPersistedAuth ? false : loading;
-
     return (
-        <AuthContext.Provider value={{
-            user,
-            loading: effectiveLoading,
-            initializing,
-            login,
-            logout
-        }}>
-            {children}
+        <AuthContext.Provider value={{ user, role, loading: loading || initializing, login, logout }}>
+            {!initializing && children}
         </AuthContext.Provider>
     );
 }
