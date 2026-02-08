@@ -1,6 +1,6 @@
-import { getProducts, getCategories, getOffers, Product, Category, Offer } from "@/app/actions";
+import { getProducts, getCategories, getOffers } from "@/app/actions";
 import Link from "next/link";
-import { Tag, Filter, Package, ChevronRight, Search, ShoppingBag } from "lucide-react";
+import { Package } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -83,8 +83,8 @@ export default async function ProductsPage({
                                                             key={sub.id}
                                                             href={`/products?category=${cat.id}&subcategory=${sub.id}`}
                                                             className={`block text-xs transition-colors duration-300 ${params.subcategory === sub.id
-                                                                    ? "text-brand-dark font-medium"
-                                                                    : "text-gray-400 hover:text-brand-dark"
+                                                                ? "text-brand-dark font-medium"
+                                                                : "text-gray-400 hover:text-brand-dark"
                                                                 }`}
                                                         >
                                                             {sub.name}
@@ -159,7 +159,7 @@ export default async function ProductsPage({
                                                     )}
                                                     {product.featured && (
                                                         <span className="bg-brand-gold text-white text-[10px] uppercase tracking-widest px-2 py-1">
-                                                            Editor's Pick
+                                                            Editor&apos;s Pick
                                                         </span>
                                                     )}
                                                 </div>

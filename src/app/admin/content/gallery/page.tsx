@@ -10,7 +10,7 @@ import {
     Upload,
     Trash2,
     Image as ImageIcon,
-    X
+
 } from "lucide-react";
 import Link from "next/link";
 

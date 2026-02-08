@@ -13,7 +13,7 @@ import {
     Users,
     Home,
     Menu,
-    X,
+
     Package,
     Folder,
     Palette
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
                     <div>
                         <h2 className="text-2xl font-serif text-brand-dark">Overview</h2>
                         <p className="text-sm text-gray-500 hidden sm:block mt-1">
-                            Welcome back, here's what's happening today.
+                            Welcome back, here&apos;s what&apos;s happening today.
                         </p>
                     </div>
                 </header>
