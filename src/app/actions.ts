@@ -13,12 +13,13 @@ export async function testFirebaseConnection() {
             message: "Connected to Firebase!",
             collections: snapshot.map(col => col.id)
         };
-    } catch (error: any) {
-        console.error("Firebase Connection Error:", error.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        console.error("Firebase Connection Error:", errorMessage);
         return {
             success: false,
             message: "Failed to connect to Firebase. Check your .env.local file.",
-            error: error.message
+            error: errorMessage
         };
     }
 }

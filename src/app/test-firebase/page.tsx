@@ -17,8 +17,9 @@ export default function TestFirebasePage() {
         try {
             const res = await testFirebaseConnection();
             setResult(res);
-        } catch (err: any) {
-            setResult({ success: false, message: "Action failed", error: err.message });
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            setResult({ success: false, message: "Action failed", error: errorMessage });
         } finally {
             setLoading(false);
         }
@@ -37,8 +38,8 @@ export default function TestFirebasePage() {
                         onClick={handleTest}
                         disabled={loading}
                         className={`px-6 py-3 rounded-lg font-semibold text-white transition-all transform active:scale-95 ${loading
-                                ? "bg-slate-400 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
+                            ? "bg-slate-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
                             }`}
                     >
                         {loading ? "Testing Connection..." : "Test Firebase Connection"}
@@ -74,7 +75,7 @@ export default function TestFirebasePage() {
 
                         {!result.success && !result.error && (
                             <p className="mt-4 text-xs text-slate-500 italic">
-                                Hint: Make sure you've added your credentials to `.env.local`.
+                                Hint: Make sure you&apos;ve added your credentials to `.env.local`.
                             </p>
                         )}
                     </div>
