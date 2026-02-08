@@ -1,3 +1,4 @@
+```typescript
 "use client";
 
 import { useState, useEffect } from "react";
@@ -42,11 +43,15 @@ export default function ProductsManager() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [offers, setOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    
+    // ... filters state
+    const [searchTerm, setSearchTerm] = useState("");
     const [filterCategory, setFilterCategory] = useState<string>("");
-    const [filterAvailable, setFilterAvailable] = useState<string>("");
     const [uploading, setUploading] = useState(false);
 
     const [formData, setFormData] = useState<{
@@ -143,7 +148,7 @@ export default function ProductsManager() {
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+                const storageRef = ref(storage, `products / ${ Date.now() }_${ file.name } `);
                 await uploadBytes(storageRef, file);
                 const url = await getDownloadURL(storageRef);
                 newImages.push(url);
@@ -559,62 +564,29 @@ export default function ProductsManager() {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <h4 className="font-semibold text-gray-800">{product.name}</h4>
-                                                {!product.available && (
-                                                    <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">
-                                                        Unavailable
-                                                    </span>
-                                                )}
+                                                    <Package className="w-12 h-12 text-gray-300" />
+                                                </div>
+                                            )}
+                                            <div className="absolute top-2 right-2 flex gap-1">
+                                                <div className={`px - 2 py - 1 rounded - full text - xs font - medium ${ product.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' } `}>
+                                                    {product.available ? 'Stock' : 'Out'}
+                                                </div>
                                                 {product.featured && (
-                                                    <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded">
+                                                    <div className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
                                                         Featured
-                                                    </span>
-                                                )}
-                                                {offer && (
-                                                    <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded flex items-center gap-1">
-                                                        <Tag className="w-3 h-3" />
-                                                        {offer.discount}
-                                                    </span>
+                                                    </div>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-500">
-                                                {getCategoryName(product.categoryId)}
-                                                {product.subcategoryId && ` → ${getCategoryName(product.subcategoryId)}`}
-                                            </p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="font-bold text-amber-600">₹{product.price}</span>
+                                        </div>
+                                        
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-lg font-bold text-amber-600">₹{product.price}</span>
                                                 {product.originalPrice && (
                                                     <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
                                                 )}
                                             </div>
-                                            {/* Show Image Count if multiple */}
-                                            {product.images && product.images.length > 1 && (
-                                                <div className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-                                                    <ImageIcon className="w-3 h-3" />
-                                                    {product.images.length} images
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => handleToggleAvailability(product.id, product.available)}
-                                                className={`p-2 rounded-lg transition-colors ${product.available
-                                                    ? "text-green-600 hover:bg-green-50"
-                                                    : "text-gray-400 hover:bg-gray-100"
-                                                    }`}
-                                                title={product.available ? "Mark unavailable" : "Mark available"}
-                                            >
-                                                {product.available ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(product)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                                            >
-                                                <Edit2 className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(product.id)}
                                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                                             >
                                                 <Trash2 className="w-5 h-5" />

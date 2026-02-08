@@ -362,18 +362,35 @@ export interface Product {
     updatedAt?: Date;
 }
 
-export async function getProducts(categoryId?: string, available?: boolean): Promise<Product[]> {
+export async function getProducts(
+    categoryId?: string,
+    available?: boolean,
+    limitCount: number = 50,
+    startAfterId?: string
+): Promise<Product[]> {
     try {
         let query: admin.firestore.Query = getAdminDb().collection("products");
 
         if (categoryId) {
             query = query.where("categoryId", "==", categoryId);
         }
+        // Note: Firestore requires an index for combining equality operators (==) with range/order operators (orderBy/limit)
+        // creating the index is a manual step in Firebase console usually.
+        // If 'available' is used effectively as a filter, we might need a composite index.
         if (available !== undefined) {
             query = query.where("available", "==", available);
         }
 
-        const snapshot = await query.orderBy("createdAt", "desc").get();
+        query = query.orderBy("createdAt", "desc");
+
+        if (startAfterId) {
+            const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
+            if (startAfterDoc.exists) {
+                query = query.startAfter(startAfterDoc);
+            }
+        }
+
+        const snapshot = await query.limit(limitCount).get();
         return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
             ...doc.data(),

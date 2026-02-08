@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteContent, updateSiteContent } from "@/app/actions";
+import { useBranding } from "@/context/branding-context";
 import {
     Loader2,
     ArrowLeft,
@@ -43,6 +44,7 @@ const defaultBranding: BrandingContent = {
 export default function BrandingEditor() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
+    const { refreshBranding } = useBranding(); // Fix: Destructure refreshBranding
     const [content, setContent] = useState<BrandingContent>(defaultBranding);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -62,11 +64,17 @@ export default function BrandingEditor() {
 
     const loadContent = async () => {
         setLoading(true);
-        const data = await getSiteContent<BrandingContent>("branding");
-        if (data) {
-            setContent({ ...defaultBranding, ...data });
+        try {
+            const data = await getSiteContent<BrandingContent>("branding");
+            if (data) {
+                setContent({ ...defaultBranding, ...data });
+            }
+        } catch (error) {
+            console.error("Failed to load branding content:", error);
+            // Optional: Add toast or error state here
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSave = async (e: React.FormEvent) => {
@@ -76,6 +84,7 @@ export default function BrandingEditor() {
         const result = await updateSiteContent("branding", content as unknown as Record<string, unknown>);
         if (result.success) {
             setSaved(true);
+            await refreshBranding(); // Called refreshBranding after successful save
             setTimeout(() => setSaved(false), 3000);
         }
         setSaving(false);

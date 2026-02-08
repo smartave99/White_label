@@ -1,10 +1,15 @@
 import Hero from "@/components/Hero";
 import Highlights from "@/components/Highlights";
+import { getSiteContent, HeroContent } from "@/app/actions";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const heroContent = await getSiteContent<HeroContent>("hero");
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Hero />
+      <Hero content={heroContent} />
       <Highlights />
       <section className="py-20 bg-slate-50">
         <div className="container mx-auto px-4 md:px-6">

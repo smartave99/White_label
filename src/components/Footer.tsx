@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 
 import { useContact } from "@/context/contact-context";
 import { useBranding } from "@/context/branding-context";
@@ -35,6 +35,11 @@ export default function Footer() {
                             {branding.instagramUrl && (
                                 <a href={branding.instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
                                     <Instagram className="w-4 h-4" />
+                                </a>
+                            )}
+                            {branding.whatsappUrl && (
+                                <a href={branding.whatsappUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">
+                                    <MessageCircle className="w-4 h-4" />
                                 </a>
                             )}
                             <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-brand-gold hover:text-brand-dark transition-colors">

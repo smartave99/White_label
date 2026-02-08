@@ -73,25 +73,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
+            setLoading(false);
+            setInitializing(false);
+            setPersistedAuth(!!user);
+            setPersistedAuthState(!!user);
+
             if (user && user.email) {
-                // Fetch role from server action
-                try {
-                    const userRole = await getStaffRole(user.email);
-                    setRole(userRole || "Staff"); // Default to Staff if found in DB but no role, or null (handled in component)
-                } catch (e) {
-                    console.error("Error fetching role", e);
-                    setRole("Staff");
-                }
+                // Fetch role from server action in background without blocking UI
+                getStaffRole(user.email)
+                    .then((userRole) => {
+                        setRole(userRole || "Staff");
+                    })
+                    .catch((e) => {
+                        console.error("Error fetching role", e);
+                        setRole("Staff");
+                    });
             } else {
                 setRole(null);
             }
-
-            setLoading(false);
-            setInitializing(false);
-            setPersistedAuth(!!user); // Using the global setPersistedAuth function
-            setPersistedAuthState(!!user); // Also updating the local state variable
         });
 
         // Force stop loading after 10 seconds to prevent infinite load

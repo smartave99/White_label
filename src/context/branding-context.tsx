@@ -30,35 +30,38 @@ const defaultBranding: BrandingSettings = {
 interface BrandingContextType {
     branding: BrandingSettings;
     loading: boolean;
+    refreshBranding: () => Promise<void>;
 }
 
 const BrandingContext = createContext<BrandingContextType>({
     branding: defaultBranding,
-    loading: true
+    loading: true,
+    refreshBranding: async () => { },
 });
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
     const [branding, setBranding] = useState<BrandingSettings>(defaultBranding);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function loadBranding() {
-            try {
-                const data = await getSiteContent<BrandingSettings>("branding");
-                if (data) {
-                    setBranding({ ...defaultBranding, ...data });
-                }
-            } catch (error) {
-                console.error("Failed to load branding:", error);
-            } finally {
-                setLoading(false);
+    const loadBranding = async () => {
+        try {
+            const data = await getSiteContent<BrandingSettings>("branding");
+            if (data) {
+                setBranding({ ...defaultBranding, ...data });
             }
+        } catch (error) {
+            console.error("Failed to load branding:", error);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    useEffect(() => {
         loadBranding();
     }, []);
 
     return (
-        <BrandingContext.Provider value={{ branding, loading }}>
+        <BrandingContext.Provider value={{ branding, loading, refreshBranding: loadBranding }}>
             {children}
         </BrandingContext.Provider>
     );
