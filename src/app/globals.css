@@ -8,23 +8,27 @@
   --color-accent: var(--accent);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
-  
+
   /* Custom Colors - Premium International Brand Palette (Defaults) */
-  --color-brand-green: var(--primary); 
+  --color-brand-green: var(--primary);
   --color-brand-gold: var(--secondary);
-  --color-brand-gold-light: #E6C888; 
-  --color-brand-dark: #121212; 
-  --color-brand-sand: #F5F2EA; 
-  --color-brand-gray: #8E8E8E; 
+  --color-brand-gold-light: #E6C888;
+  --color-brand-dark: #121212;
+  --color-brand-sand: #F5F2EA;
+  --color-brand-gray: #8E8E8E;
 }
 
 :root {
-  /* Default values, overridden by SiteConfigContext */
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #064e3b; 
+  --primary: #064e3b;
   --secondary: #d4af37;
   --accent: #10b981;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --brand-dark: #0F281E;
+  --brand-gold: #C5A059;
+  --brand-green: #0F281E;
+  --brand-sand: #FDFBF7;
+  /* Cream/Sand background for premium feel */
 }
 
 /* Glassmorphism Utilities */
@@ -44,6 +48,11 @@ body {
   font-family: var(--font-sans);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
 }
