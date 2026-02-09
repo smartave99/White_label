@@ -390,10 +390,10 @@ export async function getProducts(
 ): Promise<Product[]> {
     const cache = getSearchCache();
 
-    // For simple queries (available products, no pagination), use cache
-    const canUseCache = available === true && !startAfterId && !categoryId && limitCount >= 50;
+    // For simple queries (all products, no filters, no pagination), use cache
+    const canUseCache = !startAfterId && !categoryId && available === undefined && limitCount >= 50;
     if (canUseCache) {
-        const cacheKey = CacheKeys.availableProducts();
+        const cacheKey = CacheKeys.allProducts();
         const cached = cache.get<Product[]>(cacheKey);
         if (cached) {
             return cached;
@@ -432,7 +432,7 @@ export async function getProducts(
 
         // Cache if this was a cacheable query
         if (canUseCache) {
-            cache.set(CacheKeys.availableProducts(), products);
+            cache.set(CacheKeys.allProducts(), products);
         }
 
         return products;
@@ -451,13 +451,13 @@ export async function searchProducts(
     categoryId?: string,
     subcategoryId?: string
 ): Promise<Product[]> {
-    // Get all available products (uses cache)
-    const products = await getProducts(undefined, true, 100);
+    // Get all products (uses cache) and filter available ones in-memory
+    const allProducts = await getProducts();
 
     const searchLower = searchQuery.toLowerCase().trim();
 
-    // Filter products
-    let filtered = products;
+    // Filter to available products first
+    let filtered = allProducts.filter(p => p.available);
 
     // Text search filter
     if (searchLower) {

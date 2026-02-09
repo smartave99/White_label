@@ -29,6 +29,7 @@ const navItems = [
     { name: "Station Info", href: "/admin/content/contact", icon: Phone },
     { name: "AI Assistant", href: "/admin/api-keys", icon: Bot },
     { name: "Branding", href: "/admin/content/branding", icon: Settings },
+    { name: "Appearance", href: "/admin/appearance", icon: Palette },
 ];
 
 export default function AdminDashboard() {

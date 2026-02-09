@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { revalidatePath } from "next/cache";
 
@@ -13,6 +13,7 @@ const CONFIG_DOC_ID = "main";
  */
 export async function getSiteConfig(): Promise<SiteConfig> {
     try {
+        const adminDb = getAdminDb();
         const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
         const docSnap = await docRef.get();
 
@@ -47,6 +48,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
  */
 export async function updateSiteConfig(newConfig: SiteConfig): Promise<{ success: boolean; error?: string }> {
     try {
+        const adminDb = getAdminDb();
         const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
         await docRef.set(newConfig);
 

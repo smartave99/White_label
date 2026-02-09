@@ -3,21 +3,28 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
   
-  /* Custom Colors - Premium International Brand Palette */
-  --color-brand-green: #0F281E; /* Deep Forest Green */
-  --color-brand-gold: #C5A059; /* Muted Champagne Gold */
-  --color-brand-gold-light: #E6C888; /* Pale Gold */
-  --color-brand-dark: #121212; /* Rich Black */
-  --color-brand-sand: #F5F2EA; /* Warm Canvas/Sand */
-  --color-brand-gray: #8E8E8E; /* Neutral Gray */
+  /* Custom Colors - Premium International Brand Palette (Defaults) */
+  --color-brand-green: var(--primary); 
+  --color-brand-gold: var(--secondary);
+  --color-brand-gold-light: #E6C888; 
+  --color-brand-dark: #121212; 
+  --color-brand-sand: #F5F2EA; 
+  --color-brand-gray: #8E8E8E; 
 }
 
 :root {
-  --background: #f8fafc; /* slate-50 */
-  --foreground: #0f172a; /* slate-900 */
+  /* Default values, overridden by SiteConfigContext */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #064e3b; 
+  --secondary: #d4af37;
+  --accent: #10b981;
 }
 
 /* Glassmorphism Utilities */
