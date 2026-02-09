@@ -9,7 +9,8 @@
  */
 
 import { getProducts, getCategories, Product } from "@/app/actions";
-import { analyzeIntent, rankProducts, generateSummary } from "./llm-service";
+import { analyzeIntent, rankAndSummarize } from "./llm-service";
+import { getSearchCache, hashQuery } from "./search-cache";
 import {
     RecommendationRequest,
     RecommendationResponse,
@@ -44,14 +45,27 @@ export async function getRecommendations(
         const query = request.query.trim();
         const maxResults = request.maxResults || DEFAULT_MAX_RESULTS;
 
-        // Step 1: Get categories for intent analysis
+        // Check cache for similar queries
+        const cache = getSearchCache();
+        const queryHash = hashQuery(query);
+        const cacheKey = `recommendation:${queryHash}`;
+
+        const cachedResult = cache.get<RecommendationResponse>(cacheKey);
+        if (cachedResult) {
+            return {
+                ...cachedResult,
+                processingTime: Date.now() - startTime,
+            };
+        }
+
+        // Step 1: Get categories for intent analysis (cached in getCategories)
         const categories = await getCategories();
 
-        // Step 2: Analyze user intent
+        // Step 2: Analyze user intent (1st LLM call)
         const intentResponse = await analyzeIntent(query, categories);
         const intent = mapIntentResponse(intentResponse);
 
-        // Step 3: Query relevant products
+        // Step 3: Query relevant products (cached in getProducts)
         const products = await queryProducts(intent, request.context);
 
         if (products.length === 0) {
@@ -64,23 +78,28 @@ export async function getRecommendations(
             };
         }
 
-        // Step 4: Rank products using LLM
-        const rankings = await rankProducts(query, products.slice(0, MAX_PRODUCTS_TO_ANALYZE), intentResponse);
+        // Step 4: Rank products AND generate summary in single LLM call (2nd LLM call)
+        const { rankings, summary } = await rankAndSummarize(
+            query,
+            products.slice(0, MAX_PRODUCTS_TO_ANALYZE),
+            intentResponse
+        );
 
         // Step 5: Build recommendations
         const recommendations = buildRecommendations(rankings, products, maxResults);
 
-        // Step 6: Generate summary
-        const topProduct = recommendations.length > 0 ? recommendations[0].product.name : null;
-        const summary = await generateSummary(query, recommendations.length, topProduct);
-
-        return {
+        const result: RecommendationResponse = {
             success: true,
             intent,
             recommendations,
             summary,
             processingTime: Date.now() - startTime,
         };
+
+        // Cache the result for 2 minutes
+        cache.set(cacheKey, result, 2 * 60 * 1000);
+
+        return result;
     } catch (error) {
         console.error("[RecommendationEngine] Error:", error);
         return {

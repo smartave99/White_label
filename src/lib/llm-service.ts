@@ -252,3 +252,70 @@ Write a brief, friendly 1-2 sentence summary to introduce the recommendations. B
     const response = await callGeminiAPI(prompt);
     return response.trim().replace(/```/g, "").replace(/^["']|["']$/g, "");
 }
+
+/**
+ * Combined ranking and summary generation in a single LLM call
+ * Reduces API calls from 3 to 2 for better performance
+ */
+export async function rankAndSummarize(
+    query: string,
+    products: Product[],
+    intent: LLMIntentResponse
+): Promise<{
+    rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
+    summary: string;
+}> {
+    if (products.length === 0) {
+        return {
+            rankings: [],
+            summary: "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?",
+        };
+    }
+
+    const productList = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        tags: p.tags,
+    }));
+
+    const prompt = `You are a product recommendation assistant for Smart Avenue retail store in India.
+
+Customer query: "${query}"
+
+Intent analysis:
+- Use case: ${intent.useCase}
+- Requirements: ${intent.requirements.join(", ") || "none specified"}
+- Preferences: ${intent.preferences.join(", ") || "none specified"}
+- Budget: ${intent.budgetMin ? `₹${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `₹${intent.budgetMax}` : "any"}
+
+Available products:
+${JSON.stringify(productList, null, 2)}
+
+Do two things:
+1. Rank the top 3-5 most suitable products for this customer
+2. Write a brief, friendly 1-2 sentence summary to introduce the recommendations
+
+Respond with a JSON object (and nothing else) in this exact format:
+{
+  "rankings": [
+    {
+      "productId": "the product ID",
+      "matchScore": 0-100 indicating how well it matches,
+      "highlights": ["key features that match their needs"],
+      "whyRecommended": "A 1-2 sentence explanation"
+    }
+  ],
+  "summary": "A brief, friendly 1-2 sentence summary for the customer"
+}
+
+Only include relevant products. If no products match well, return empty rankings.`;
+
+    const response = await callGeminiAPI(prompt);
+    return parseJSONFromResponse<{
+        rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
+        summary: string;
+    }>(response);
+}
+
