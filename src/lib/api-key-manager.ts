@@ -39,7 +39,8 @@ class APIKeyManager {
     private activeKeyIndex: Record<LLMProvider, number> = {
         google: 0,
         openai: 0,
-        anthropic: 0
+        anthropic: 0,
+        groq: 0
     };
     private lastRotation: Date | null = null;
     private initialized: boolean = false;
@@ -74,6 +75,11 @@ class APIKeyManager {
         // Anthropic keys
         if (process.env.ANTHROPIC_API_KEY) {
             envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic" });
+        }
+
+        // Groq keys
+        if (process.env.GROQ_API_KEY) {
+            envKeys.push({ key: process.env.GROQ_API_KEY.trim(), provider: "groq" });
         }
 
         this.rebuildKeyList(envKeys, this.firestoreKeys);
@@ -120,6 +126,10 @@ class APIKeyManager {
 
             if (process.env.ANTHROPIC_API_KEY) {
                 envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic" });
+            }
+
+            if (process.env.GROQ_API_KEY) {
+                envKeys.push({ key: process.env.GROQ_API_KEY.trim(), provider: "groq" });
             }
 
             this.rebuildKeyList(envKeys, validKeys);

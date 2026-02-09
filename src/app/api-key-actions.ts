@@ -155,58 +155,102 @@ export async function deleteAPIKey(id: string) {
 // ==================== API KEY TESTING ====================
 
 /**
- * Test if an API key is functional by making a simple request to Gemini
+ * Test if an API key is functional
  */
-export async function testAPIKey(keyOrId: string, isId: boolean = false) {
+export async function testAPIKey(keyOrId: string, isId: boolean = false, providerStr?: string) {
     try {
         let apiKey = keyOrId;
+        let provider: LLMProvider = (providerStr as LLMProvider) || "google";
 
-        // If it's an ID, fetch the key from Firestore
+        // If it's an ID, fetch the key and provider from Firestore
         if (isId) {
             const doc = await getAdminDb().collection("apiKeys").doc(keyOrId).get();
             if (!doc.exists) {
                 return { success: false, error: "API key not found", isValid: false };
             }
-            apiKey = doc.data()?.key;
+            const data = doc.data();
+            apiKey = data?.key;
+            provider = (data?.provider as LLMProvider) || "google";
         }
 
-        if (!apiKey || apiKey.trim().length < 10) {
+        if (!apiKey || apiKey.trim().length < 5) { // Adjusted min length as some keys might be short?
             return { success: false, error: "Invalid API key format", isValid: false };
         }
 
-        // Make a simple test request to Gemini
-        const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey.trim()}`;
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: "Say hello in one word." }] }],
-                generationConfig: { maxOutputTokens: 10 },
-            }),
-        });
-
-        const isValid = response.ok;
+        let isValid = false;
         let errorMessage = "";
+        let statusCode = 0;
 
-        if (!isValid) {
-            const data = await response.json().catch(() => ({}));
-            if (response.status === 429) {
-                errorMessage = "Rate limited - key is valid but temporarily throttled";
-                // Still consider it valid if rate limited
-            } else if (response.status === 400) {
-                errorMessage = data.error?.message || "Invalid request format";
-            } else if (response.status === 403) {
-                errorMessage = "API key is invalid or lacks permissions";
-            } else {
-                errorMessage = data.error?.message || `HTTP ${response.status}`;
+        // Test based on provider
+        if (provider === "google") {
+            const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey.trim()}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Hi" }] }],
+                    generationConfig: { maxOutputTokens: 5 },
+                }),
+            });
+            statusCode = response.status;
+            isValid = response.ok;
+            if (!isValid) {
+                const data = await response.json().catch(() => ({}));
+                errorMessage = data.error?.message || `HTTP ${statusCode}`;
             }
+        } else if (provider === "openai") {
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey.trim()}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: "Hi" }],
+                    max_tokens: 5,
+                }),
+            });
+            statusCode = response.status;
+            isValid = response.ok;
+            if (!isValid) {
+                const data = await response.json().catch(() => ({}));
+                errorMessage = data.error?.message || `HTTP ${statusCode}`;
+            }
+        } else if (provider === "anthropic") {
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": apiKey.trim(),
+                    "anthropic-version": "2023-06-01"
+                },
+                body: JSON.stringify({
+                    model: "claude-3-haiku-20240307", // Use cheapest model for testing
+                    messages: [{ role: "user", content: "Hi" }],
+                    max_tokens: 5,
+                }),
+            });
+            statusCode = response.status;
+            isValid = response.ok;
+            if (!isValid) {
+                const errorText = await response.text();
+                errorMessage = `HTTP ${statusCode} - ${errorText.substring(0, 100)}`;
+            }
+        } else {
+            return { success: false, error: "Unknown provider", isValid: false };
+        }
+
+        // Handle rate limits (429) as success for validity check
+        if (statusCode === 429) {
+            isValid = true;
+            errorMessage = "Rate limited (Key is valid)";
         }
 
         // If testing by ID, update the key's validation status in Firestore
         if (isId) {
             await getAdminDb().collection("apiKeys").doc(keyOrId).update({
-                isValid: isValid || response.status === 429, // Rate limited = still valid
+                isValid: isValid,
                 lastTested: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             });
@@ -214,9 +258,9 @@ export async function testAPIKey(keyOrId: string, isId: boolean = false) {
 
         return {
             success: true,
-            isValid: isValid || response.status === 429,
+            isValid: isValid,
             message: isValid ? "API key is working correctly" : errorMessage,
-            statusCode: response.status,
+            statusCode: statusCode,
         };
     } catch (error) {
         console.error("[testAPIKey] Error:", error);

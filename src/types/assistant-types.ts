@@ -4,7 +4,7 @@ import { Product } from "@/app/actions";
 
 // ==================== API KEY MANAGEMENT ====================
 
-export type LLMProvider = "google" | "openai" | "anthropic";
+export type LLMProvider = "google" | "openai" | "anthropic" | "groq";
 
 export interface APIKeyConfig {
     key: string;

@@ -19,7 +19,7 @@ export default function GalleryEditor() {
     const router = useRouter();
     const [images, setImages] = useState<GalleryImage[]>([]);
     const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
+    // const [uploading, setUploading] = useState(false); // Removed unused state
 
     const [showUpload, setShowUpload] = useState(false);
 
@@ -45,7 +45,7 @@ export default function GalleryEditor() {
     const handleUpload = async (files: { url: string; path: string }[]) => {
         if (files.length === 0) return;
 
-        setUploading(true);
+        // setUploading(true);
         try {
             for (const file of files) {
                 await addGalleryImage(file.url, file.path);
@@ -56,7 +56,7 @@ export default function GalleryEditor() {
             console.error("Error adding gallery images:", error);
             alert("Failed to add images");
         } finally {
-            setUploading(false);
+            // setUploading(false);
         }
     };
 
@@ -134,14 +134,12 @@ export default function GalleryEditor() {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {images.map((image) => (
                                 <div key={image.id} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
-                                    <img
+                                    <Image
                                         src={image.imageUrl}
                                         alt="Gallery"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = "https://via.placeholder.com/300?text=Image+Error";
-                                        }}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
                                     />
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <button

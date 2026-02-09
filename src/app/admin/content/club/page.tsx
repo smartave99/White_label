@@ -12,7 +12,6 @@ import {
     Trash2,
     Save,
     CreditCard,
-    Check,
     X,
     MoveUp,
     MoveDown
@@ -126,7 +125,7 @@ export default function ClubContentManager() {
         }
     };
 
-    const updateTierField = (index: number, field: keyof ClubTier, value: any) => {
+    const updateTierField = (index: number, field: keyof ClubTier, value: string | boolean) => {
         const newTiers = [...tiers];
         newTiers[index] = { ...newTiers[index], [field]: value };
         setTiers(newTiers);
