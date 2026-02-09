@@ -30,7 +30,7 @@ const navItems = [
 ];
 
 export default function AdminDashboard() {
-    const { user, loading: authLoading, logout } = useAuth();
+    const { user, loading: authLoading, logout, role } = useAuth();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -81,7 +81,6 @@ export default function AdminDashboard() {
     }
 
     // Role is now derived from AuthContext
-    const dashboardTitle = `${role} Dashboard`;
     const dashboardTitle = `${role} Dashboard`;
 
     return (

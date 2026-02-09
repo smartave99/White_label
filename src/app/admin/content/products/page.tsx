@@ -1,4 +1,3 @@
-```typescript
 "use client";
 
 import { useState, useEffect } from "react";
@@ -48,10 +47,12 @@ export default function ProductsManager() {
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    
+
+
     // ... filters state
     const [searchTerm, setSearchTerm] = useState("");
     const [filterCategory, setFilterCategory] = useState<string>("");
+    const [filterAvailable, setFilterAvailable] = useState<string>("");
     const [uploading, setUploading] = useState(false);
 
     const [formData, setFormData] = useState<{
@@ -148,7 +149,7 @@ export default function ProductsManager() {
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const storageRef = ref(storage, `products / ${ Date.now() }_${ file.name } `);
+                const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
                 await uploadBytes(storageRef, file);
                 const url = await getDownloadURL(storageRef);
                 newImages.push(url);
@@ -564,7 +565,7 @@ export default function ProductsManager() {
                                                     </div>
                                                 )}
                                             </div>
-                                            
+
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap mb-1">
                                                     <h4 className="font-semibold text-gray-800 truncate">{product.name}</h4>
@@ -587,7 +588,7 @@ export default function ProductsManager() {
                                                 </div>
                                                 <p className="text-sm text-gray-500">
                                                     {getCategoryName(product.categoryId)}
-                                                    {product.subcategoryId && ` → ${ getCategoryName(product.subcategoryId) } `}
+                                                    {product.subcategoryId && ` → ${getCategoryName(product.subcategoryId)}`}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="font-bold text-amber-600">₹{product.price}</span>
@@ -600,7 +601,7 @@ export default function ProductsManager() {
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => handleToggleAvailability(product.id, product.available)}
-                                                    className={`p - 2 rounded - lg transition - colors ${ product.available ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100' } `}
+                                                    className={`p-2 rounded-lg transition-colors ${product.available ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
                                                     title={product.available ? "Mark as Out of Stock" : "Mark as In Stock"}
                                                 >
                                                     {product.available ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
@@ -622,20 +623,6 @@ export default function ProductsManager() {
                                     );
                                 })}
                             </div>
-
-                            {/* Load More Button */}
-                            {hasMore && !loading && (
-                                <div className="p-4 border-t border-gray-100 text-center">
-                                    <button
-                                        onClick={loadMoreProducts}
-                                        disabled={loadingMore}
-                                        className="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center gap-2 mx-auto"
-                                    >
-                                        {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                        Load More Products
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
