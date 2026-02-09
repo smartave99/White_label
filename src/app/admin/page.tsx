@@ -14,7 +14,8 @@ import {
     Menu,
     Phone,
     Megaphone,
-    Bot
+    Bot,
+    Palette
 } from "lucide-react";
 import Link from "next/link";
 
