@@ -145,12 +145,16 @@ async function queryProducts(
         categoryId = intent.subcategory;
     }
 
-    // Get products (only available ones)
-    let products = await getProducts(categoryId, true, 50);
+    // Get all products (cached), filter available in-memory
+    let products = (await getProducts()).filter(p => p.available);
 
-    // If no products in specific category, try without category filter
-    if (products.length === 0 && categoryId) {
-        products = await getProducts(undefined, true, 50);
+    // Filter by category if specified
+    if (categoryId) {
+        const categoryFiltered = products.filter(p => p.categoryId === categoryId || p.subcategoryId === categoryId);
+        if (categoryFiltered.length > 0) {
+            products = categoryFiltered;
+        }
+        // If no products in specific category, keep all available products
     }
 
     // Filter by budget if specified
