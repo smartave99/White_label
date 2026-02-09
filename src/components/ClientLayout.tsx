@@ -7,6 +7,7 @@ import { SiteConfigProvider } from "@/context/SiteConfigContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import AssistantChat from "./assistant/AssistantChat";
 
 export default function ClientLayout({
     children,
@@ -21,6 +22,7 @@ export default function ClientLayout({
                         <ContactProvider>
                             <Header />
                             {children}
+                            <AssistantChat />
                             <Footer />
                         </ContactProvider>
                     </BrandingProvider>

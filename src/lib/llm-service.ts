@@ -346,7 +346,6 @@ export async function rankAndSummarize(
     query: string,
     products: Product[],
     intent: LLMIntentResponse,
-    provider: LLMProvider = "google"
 ): Promise<{
     rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
     summary: string;
@@ -398,7 +397,7 @@ Respond with a JSON object (and nothing else) in this exact format:
 
 Only include relevant products. If no products match well, return empty rankings.`;
 
-    const response = await callLLM(prompt, provider);
+    const response = await callLLM(prompt);
     return parseJSONFromResponse<{
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;
         summary: string;
