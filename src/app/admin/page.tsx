@@ -13,7 +13,8 @@ import {
     Tag,
     Menu,
     Phone,
-    Megaphone
+    Megaphone,
+    Bot
 } from "lucide-react";
 import Link from "next/link";
 
@@ -26,6 +27,7 @@ const navItems = [
     { name: "Hero Section", href: "/admin/content/hero", icon: LayoutDashboard },
     { name: "Staff Management", href: "/admin/staff", icon: Users },
     { name: "Station Info", href: "/admin/content/contact", icon: Phone },
+    { name: "AI Assistant", href: "/admin/api-keys", icon: Bot },
     { name: "Branding", href: "/admin/content/branding", icon: Settings },
 ];
 

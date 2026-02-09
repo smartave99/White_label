@@ -4,14 +4,19 @@
  * POST /api/assistant/recommend
  * 
  * Accepts natural language queries and returns product recommendations.
+ * Syncs API keys from Firestore before processing.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { getRecommendations } from "@/lib/recommendation-engine";
 import { RecommendationRequest } from "@/types/assistant-types";
+import { syncAPIKeysToManager } from "@/app/api-key-actions";
 
 export async function POST(request: NextRequest) {
     try {
+        // Sync API keys from Firestore
+        await syncAPIKeysToManager();
+
         const body = await request.json();
 
         // Validate request body
@@ -79,6 +84,9 @@ export async function POST(request: NextRequest) {
 
 // Optionally support GET for simple queries
 export async function GET(request: NextRequest) {
+    // Sync API keys from Firestore
+    await syncAPIKeysToManager();
+
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("q") || searchParams.get("query");
 

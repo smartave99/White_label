@@ -5,13 +5,18 @@
  * 
  * Returns the health status of the recommendation system,
  * including API key usage and availability.
+ * Now syncs keys from Firestore before returning status.
  */
 
 import { NextResponse } from "next/server";
 import { getAPIKeyManager } from "@/lib/api-key-manager";
+import { syncAPIKeysToManager } from "@/app/api-key-actions";
 
 export async function GET() {
     try {
+        // Sync keys from Firestore before checking health
+        await syncAPIKeysToManager();
+
         const keyManager = getAPIKeyManager();
         const keyStatus = keyManager.getHealthStatus();
 
@@ -38,7 +43,7 @@ export async function GET() {
         // Add warnings if needed
         if (keyStatus.totalKeys === 0) {
             response.status = "degraded";
-            response.warnings.push("No API keys configured. Set GEMINI_API_KEY_1 in environment variables.");
+            response.warnings.push("No API keys configured. Add keys via Admin > AI Assistant.");
         } else if (keyStatus.totalKeys === 1) {
             response.warnings.push("Only one API key configured. Consider adding more for redundancy.");
         }

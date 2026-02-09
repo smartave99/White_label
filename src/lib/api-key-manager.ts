@@ -1,8 +1,12 @@
 /**
- * API Key Manager
+ * API Key Manager with Firestore Support
  * 
  * Manages multiple API keys with automatic rotation, rate limit detection,
  * and health monitoring for high availability.
+ * 
+ * Keys can be loaded from:
+ * 1. Environment variables (GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.)
+ * 2. Firestore collection (apiKeys) - managed via admin UI
  */
 
 import {
@@ -21,17 +25,22 @@ const ERROR_COOLDOWN_MS = 30 * 1000; // 30 seconds
 // Max consecutive errors before key cooldown
 const MAX_CONSECUTIVE_ERRORS = 3;
 
+// Cache duration for Firestore keys
+const FIRESTORE_CACHE_MS = 60 * 1000; // 1 minute
+
 class APIKeyManager {
     private keys: APIKeyConfig[] = [];
     private activeKeyIndex: number = 0;
     private lastRotation: Date | null = null;
     private initialized: boolean = false;
+    private lastFirestoreLoad: Date | null = null;
+    private firestoreKeys: string[] = [];
 
     constructor() {
-        this.initializeKeys();
+        this.initializeFromEnv();
     }
 
-    private initializeKeys(): void {
+    private initializeFromEnv(): void {
         if (this.initialized) return;
 
         const keyEnvVars = [
@@ -40,10 +49,57 @@ class APIKeyManager {
             process.env.GEMINI_API_KEY_3,
         ];
 
-        this.keys = keyEnvVars
+        const envKeys = keyEnvVars
             .filter((key): key is string => !!key && key.trim() !== "")
-            .map((key, index) => ({
-                key: key.trim(),
+            .map(key => key.trim());
+
+        this.rebuildKeyList(envKeys, this.firestoreKeys);
+        this.initialized = true;
+
+        if (this.keys.length === 0) {
+            console.warn("[APIKeyManager] No API keys configured from env. Keys may be loaded from Firestore.");
+        } else {
+            console.log(`[APIKeyManager] Initialized with ${this.keys.length} API key(s) from env`);
+        }
+    }
+
+    /**
+     * Load keys from Firestore (to be called externally with Firestore data)
+     */
+    public loadFirestoreKeys(keys: string[]): void {
+        const validKeys = keys.filter(k => k && k.trim() !== "").map(k => k.trim());
+
+        if (JSON.stringify(validKeys) !== JSON.stringify(this.firestoreKeys)) {
+            console.log(`[APIKeyManager] Loading ${validKeys.length} key(s) from Firestore`);
+            this.firestoreKeys = validKeys;
+            this.lastFirestoreLoad = new Date();
+
+            // Rebuild key list combining env and Firestore keys
+            const envKeys = [
+                process.env.GEMINI_API_KEY_1,
+                process.env.GEMINI_API_KEY_2,
+                process.env.GEMINI_API_KEY_3,
+            ].filter((key): key is string => !!key && key.trim() !== "").map(k => k.trim());
+
+            this.rebuildKeyList(envKeys, validKeys);
+        }
+    }
+
+    private rebuildKeyList(envKeys: string[], firestoreKeys: string[]): void {
+        // Combine keys, avoiding duplicates, with Firestore keys taking priority
+        const allKeys = new Set([...firestoreKeys, ...envKeys]);
+        const keyArray = Array.from(allKeys);
+
+        // Preserve existing key state for keys we already have
+        const existingKeyMap = new Map(this.keys.map(k => [k.key, k]));
+
+        this.keys = keyArray.map((key, index) => {
+            const existing = existingKeyMap.get(key);
+            if (existing) {
+                return { ...existing, index };
+            }
+            return {
+                key,
                 index,
                 callCount: 0,
                 lastUsed: null,
@@ -51,15 +107,23 @@ class APIKeyManager {
                 consecutiveErrors: 0,
                 rateLimited: false,
                 cooldownUntil: null,
-            }));
+            };
+        });
 
-        if (this.keys.length === 0) {
-            console.warn("[APIKeyManager] No API keys configured. Set GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.");
-        } else {
-            console.log(`[APIKeyManager] Initialized with ${this.keys.length} API key(s)`);
+        // Reset active key index if it's out of bounds
+        if (this.activeKeyIndex >= this.keys.length) {
+            this.activeKeyIndex = 0;
         }
 
-        this.initialized = true;
+        console.log(`[APIKeyManager] Total keys available: ${this.keys.length}`);
+    }
+
+    /**
+     * Check if Firestore cache needs refresh
+     */
+    public needsFirestoreRefresh(): boolean {
+        if (!this.lastFirestoreLoad) return true;
+        return Date.now() - this.lastFirestoreLoad.getTime() > FIRESTORE_CACHE_MS;
     }
 
     /**
@@ -223,6 +287,13 @@ class APIKeyManager {
     public getKeyCount(): number {
         return this.keys.length;
     }
+
+    /**
+     * Force reload - clears cache so next request refreshes from Firestore
+     */
+    public invalidateCache(): void {
+        this.lastFirestoreLoad = null;
+    }
 }
 
 // Singleton instance
@@ -233,6 +304,12 @@ export function getAPIKeyManager(): APIKeyManager {
         apiKeyManagerInstance = new APIKeyManager();
     }
     return apiKeyManagerInstance;
+}
+
+export function resetAPIKeyManager(): void {
+    if (apiKeyManagerInstance) {
+        apiKeyManagerInstance.invalidateCache();
+    }
 }
 
 export { APIKeyManager };

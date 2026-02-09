@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminDb, admin } from "@/lib/firebase-admin";
+import { getSearchCache, CacheKeys } from "@/lib/search-cache";
 
 // ==================== OFFERS ====================
 
@@ -295,13 +296,26 @@ export interface Category {
 }
 
 export async function getCategories(): Promise<Category[]> {
+    const cache = getSearchCache();
+    const cacheKey = CacheKeys.categories();
+
+    // Check cache first
+    const cached = cache.get<Category[]>(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     try {
         const snapshot = await getAdminDb().collection("categories").orderBy("order", "asc").get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+        const categories = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
         })) as Category[];
+
+        // Cache for 5 minutes
+        cache.set(cacheKey, categories);
+        return categories;
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];
@@ -374,6 +388,18 @@ export async function getProducts(
     limitCount: number = 50,
     startAfterId?: string
 ): Promise<Product[]> {
+    const cache = getSearchCache();
+
+    // For simple queries (available products, no pagination), use cache
+    const canUseCache = available === true && !startAfterId && !categoryId && limitCount >= 50;
+    if (canUseCache) {
+        const cacheKey = CacheKeys.availableProducts();
+        const cached = cache.get<Product[]>(cacheKey);
+        if (cached) {
+            return cached;
+        }
+    }
+
     try {
         let query: admin.firestore.Query = getAdminDb().collection("products");
 
@@ -397,16 +423,64 @@ export async function getProducts(
         }
 
         const snapshot = await query.limit(limitCount).get();
-        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+        const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
             updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
         })) as Product[];
+
+        // Cache if this was a cacheable query
+        if (canUseCache) {
+            cache.set(CacheKeys.availableProducts(), products);
+        }
+
+        return products;
     } catch (error) {
         console.error("Error fetching products:", error);
         return [];
     }
+}
+
+/**
+ * Search products by text query with in-memory filtering
+ * Optimized for speed by caching products and filtering client-side
+ */
+export async function searchProducts(
+    searchQuery: string,
+    categoryId?: string,
+    subcategoryId?: string
+): Promise<Product[]> {
+    // Get all available products (uses cache)
+    const products = await getProducts(undefined, true, 100);
+
+    const searchLower = searchQuery.toLowerCase().trim();
+
+    // Filter products
+    let filtered = products;
+
+    // Text search filter
+    if (searchLower) {
+        filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(searchLower) ||
+            (p.description && p.description.toLowerCase().includes(searchLower)) ||
+            (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+        );
+    }
+
+    // Category filter
+    if (categoryId) {
+        filtered = filtered.filter(p =>
+            p.categoryId === categoryId || p.subcategoryId === categoryId
+        );
+    }
+
+    // Subcategory filter
+    if (subcategoryId) {
+        filtered = filtered.filter(p => p.subcategoryId === subcategoryId);
+    }
+
+    return filtered;
 }
 
 export async function getProduct(id: string): Promise<Product | null> {

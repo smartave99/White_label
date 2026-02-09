@@ -1,4 +1,4 @@
-import { getProducts, getCategories, getOffers } from "@/app/actions";
+import { getProducts, getCategories, getOffers, searchProducts } from "@/app/actions";
 import Link from "next/link";
 import { Package } from "lucide-react";
 
@@ -11,8 +11,12 @@ export default async function ProductsPage({
     searchParams: Promise<{ category?: string; subcategory?: string; search?: string }>
 }) {
     const params = await searchParams;
+    // Use searchProducts if there's a search query (cached + optimized)
+    // Otherwise fetch products normally
     const [products, categories, offers] = await Promise.all([
-        getProducts(),
+        params.search
+            ? searchProducts(params.search, params.category, params.subcategory)
+            : getProducts(undefined, true),
         getCategories(),
         getOffers()
     ]);
@@ -23,24 +27,20 @@ export default async function ProductsPage({
     const getOffer = (id?: string) => id ? offers.find(o => o.id === id) : null;
 
     // Filter products
-    let filteredProducts = products.filter(p => p.available);
+    let filteredProducts = params.search
+        ? products  // Already filtered by searchProducts
+        : products.filter(p => p.available);
 
-    // Search filter
-    if (params.search) {
-        const searchLower = params.search.toLowerCase();
-        filteredProducts = filteredProducts.filter(p =>
-            p.name.toLowerCase().includes(searchLower) ||
-            (p.description && p.description.toLowerCase().includes(searchLower))
-        );
-    }
-
-    if (params.category) {
-        filteredProducts = filteredProducts.filter(p =>
-            p.categoryId === params.category || p.subcategoryId === params.category
-        );
-    }
-    if (params.subcategory) {
-        filteredProducts = filteredProducts.filter(p => p.subcategoryId === params.subcategory);
+    // Category filter (only if not already filtered by searchProducts)
+    if (!params.search) {
+        if (params.category) {
+            filteredProducts = filteredProducts.filter(p =>
+                p.categoryId === params.category || p.subcategoryId === params.category
+            );
+        }
+        if (params.subcategory) {
+            filteredProducts = filteredProducts.filter(p => p.subcategoryId === params.subcategory);
+        }
     }
 
     return (
