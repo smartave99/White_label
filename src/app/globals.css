@@ -15,6 +15,12 @@
   /* Sky 600 */
   --color-brand-lime: #84cc16;
   /* Lime 500 */
+  --color-brand-green: #064e3b;
+  /* Emerald 900 - Deep Premium Green */
+  --color-brand-gold: #d4af37;
+  /* Classic Gold */
+  --color-brand-sand: #fefae0;
+  /* Soft Sand/Beige */
   --color-brand-dark: #0f172a;
   /* Slate 900 */
   --color-brand-light: #f8fafc;
@@ -36,10 +42,12 @@
 
   --brand-blue: #0284c7;
   --brand-lime: #84cc16;
+  --brand-green: #064e3b;
+  --brand-gold: #d4af37;
   --brand-dark: #020617;
   /* Slate 950 */
-  --brand-sand: #f1f5f9;
-  /* Slate 100 - Cool Gray instead of warm sand */
+  --brand-sand: #fefae0;
+  /* Soft Sand/Beige */
 
   /* Font Variables matching layout.tsx */
   --font-sans: var(--font-outfit);
