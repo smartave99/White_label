@@ -165,6 +165,30 @@ export interface ContactContent {
     storeHours: string;
 }
 
+export interface FeaturesContent {
+    title: string;
+    subtitle: string;
+    items: {
+        title: string;
+        desc: string;
+        icon: string;
+    }[];
+}
+
+export interface CTAContent {
+    title: string;
+    text: string;
+    ctaPrimary: string;
+    ctaSecondary: string;
+    backgroundImage: string;
+}
+
+export interface HighlightsContent {
+    title: string;
+    subtitle: string;
+    description: string;
+}
+
 // Get site content by section
 export async function getSiteContent<T>(section: string): Promise<T | null> {
     try {

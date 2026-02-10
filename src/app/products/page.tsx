@@ -1,6 +1,14 @@
 import { getProducts, getCategories, getOffers, searchProducts } from "@/app/actions";
 import Link from "next/link";
-import { Package, Search, Filter, ChevronRight, Zap, X, ArrowLeft, Tag } from "lucide-react";
+import { Package, Search, ChevronRight, Zap, ArrowLeft, Tag } from "lucide-react";
+
+// ... (lines 4-103 remain unchanged, effectively handled by context matching or I can just target specific lines)
+
+// ...
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
+                        <p className="text-gray-500 max-w-sm mx-auto">
+                            We couldn&apos;t find any products matching your criteria. Try adjusting your filters or search term.
+                        </p>
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
@@ -101,7 +109,7 @@ export default async function ProductsPage({
                         </div>
                         <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
                         <p className="text-gray-500 max-w-sm mx-auto">
-                            We couldn't find any products matching your criteria. Try adjusting your filters or search term.
+                            We couldn&apos;t find any products matching your criteria. Try adjusting your filters or search term.
                         </p>
                         <Link href="/products" className="inline-block mt-6 px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
                             Clear Filters

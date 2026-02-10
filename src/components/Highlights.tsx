@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, PenTool, Smile, Utensils, Home as HomeIcon, Package, LucideIcon, Smartphone, Cpu } from "lucide-react";
-import { getDepartments } from "@/app/actions";
+import { getDepartments, HighlightsContent } from "@/app/actions";
 
 const iconMap: Record<string, LucideIcon> = {
     PenTool,
@@ -13,7 +13,7 @@ const iconMap: Record<string, LucideIcon> = {
     Cpu
 };
 
-export default async function Highlights() {
+export default async function Highlights({ content }: { content?: HighlightsContent }) {
     const departments = await getDepartments();
 
     // Fallback if no departments
@@ -22,6 +22,14 @@ export default async function Highlights() {
         { id: "home", title: "Modern Home", description: "Contemporary furniture and decor.", icon: "Home", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2600&auto=format&fit=crop" },
         { id: "lifestyle", title: "Lifestyle", description: "Premium accessories for everyday.", icon: "Smile", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2599&auto=format&fit=crop" },
     ];
+
+    const defaultContent: HighlightsContent = {
+        title: "Curated Zones",
+        subtitle: "Departments",
+        description: "Navigate through our specialized departments, each designed to offer the finest in quality and innovation."
+    };
+
+    const finalContent = content || defaultContent;
 
     return (
         <section className="py-24 bg-slate-50 relative overflow-hidden">
@@ -36,12 +44,12 @@ export default async function Highlights() {
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                     <div className="max-w-xl">
-                        <span className="text-brand-blue font-bold tracking-widest uppercase text-xs mb-2 block">Departments</span>
+                        <span className="text-brand-blue font-bold tracking-widest uppercase text-xs mb-2 block">{finalContent.subtitle}</span>
                         <h2 className="text-4xl md:text-5xl font-bold text-brand-dark mb-4 tracking-tight">
-                            Curated Zones
+                            {finalContent.title}
                         </h2>
                         <p className="text-slate-500 text-lg leading-relaxed">
-                            Navigate through our specialized departments, each designed to offer the finest in quality and innovation.
+                            {finalContent.description}
                         </p>
                     </div>
                     <Link href="/departments" className="group flex items-center gap-2 text-brand-dark font-semibold border-b border-brand-dark/20 pb-1 hover:text-brand-blue hover:border-brand-blue transition-all">
