@@ -1,6 +1,6 @@
 import { getProducts, getCategories, getOffers, searchProducts, Product, Category, Offer } from "@/lib/data";
 import Link from "next/link";
-import { Package, Search, ChevronRight, Zap } from "lucide-react";
+import { Package, Search, ChevronRight, Zap, ArrowLeft, Tag } from "lucide-react";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
