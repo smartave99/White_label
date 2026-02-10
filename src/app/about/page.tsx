@@ -138,7 +138,7 @@ export default function AboutPage() {
                     <div className="text-center mb-16">
                         <span className="text-brand-blue font-bold tracking-widest uppercase text-sm mb-2 block">Get in Touch</span>
                         <h2 className="text-4xl font-bold text-brand-dark mb-4 tracking-tight">Visit Our Store</h2>
-                        <p className="text-slate-500 max-w-2xl mx-auto">We'd love to see you in person. Here's where you can find us.</p>
+                        <p className="text-slate-500 max-w-2xl mx-auto">We&apos;d love to see you in person. Here&apos;s where you can find us.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

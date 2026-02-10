@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { getDepartments, updateDepartments, DepartmentContent } from "@/app/actions";
-import { Plus, Trash2, Save, Upload, Loader2, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+
 import ImageUpload from "@/components/ImageUpload"; // Assuming this exists or I'll implement a simple input
 
 export default function DepartmentsAdminPage() {
@@ -117,7 +117,7 @@ export default function DepartmentsAdminPage() {
                 )}
 
                 <div className="grid gap-6">
-                    {departments.map((dept, index) => (
+                    {departments.map((dept) => (
                         <div key={dept.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group">
                             <div className="flex items-start justify-between gap-4 mb-4">
                                 <div className="flex-1 grid gap-4 md:grid-cols-2">

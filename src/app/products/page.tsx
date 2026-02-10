@@ -1,6 +1,6 @@
 import { getProducts, getCategories, getOffers, searchProducts, Product, Category, Offer } from "@/lib/data";
 import Link from "next/link";
-import { Package, Search, ChevronRight, Zap, ArrowLeft, Tag } from "lucide-react";
+import { Package, Search, ChevronRight, Zap, Tag } from "lucide-react";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export default async function ProductsPage({
     // For now, we are fetching all and filtering in memory or using the searchProducts action if implemented efficiently
 
     const mainCategories = categories.filter(c => !c.parentId);
-    const getSubcategories = (parentId: string) => categories.filter(c => c.parentId === parentId);
+
     const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || "Unknown";
     const getOffer = (id?: string) => id ? offers.find(o => o.id === id) : null;
 
