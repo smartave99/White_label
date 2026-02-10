@@ -210,6 +210,44 @@ export interface HighlightsContent {
     description: string;
 }
 
+export interface ProductsPageContent {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroImage: string;
+}
+
+export interface OffersPageContent {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroImage: string;
+}
+
+export interface DepartmentsPageContent {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroImage: string;
+}
+
+export interface AboutPageContent {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroImage: string;
+    visionTitle: string;
+    visionText1: string;
+    visionText2: string;
+    visionImage: string;
+    statsCustomers: string;
+    statsSatisfaction: string;
+    valuesTitle: string;
+    valuesSubtitle: string;
+    values: {
+        title: string;
+        desc: string;
+        icon: string; // Icon name matching Lucide icons
+        color: string; // Tailwind class
+    }[];
+}
+
 // Get site content by section
 export async function getSiteContent<T>(section: string): Promise<T | null> {
     try {

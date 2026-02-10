@@ -307,7 +307,8 @@ export async function syncAPIKeysToManager() {
             const data = doc.data();
             return {
                 key: data.key as string,
-                provider: (data.provider || "google") as LLMProvider
+                provider: (data.provider || "google") as LLMProvider,
+                id: doc.id
             };
         }).filter(k => k.key && k.key.trim() !== "");
 

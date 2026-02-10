@@ -49,10 +49,10 @@ export const metadata: Metadata = {
     siteName: "Smart Avnue",
     images: [
       {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Smart Avnue - Premium Retail Experience",
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Smart Avnue Logo",
       },
     ],
   },
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     title: "Smart Avnue – All your home needs, simplified.",
     description:
       "We are a one-stop departmental store offering a wide range of home essentials, stylish home décor, premium kitchenware, durable plasticware, quality crockery, cosmetics, premium stationery, soft toys, and thoughtfully curated gift items—bringing comfort, convenience, and elegance to everyday living.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
     creator: "@smartavnue",
   },
   verification: {
@@ -79,8 +79,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png",
   },
 };
 
@@ -95,6 +96,25 @@ export default function RootLayout({
         className={`${inter.variable} ${outfit.variable} antialiased bg-slate-50 text-slate-900 flex flex-col min-h-screen`}
       >
         <ClientLayout>{children}</ClientLayout>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "DepartmentStore",
+              "name": "Smart Avnue",
+              "url": "https://smartavnue.com",
+              "logo": "https://smartavnue.com/logo.png",
+              "image": "https://smartavnue.com/logo.png",
+              "description": "One-stop departmental store offering home essentials, decor, kitchenware, and gifts.",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "IN"
+              },
+              "priceRange": "₹₹"
+            })
+          }}
+        />
       </body>
     </html>
   );

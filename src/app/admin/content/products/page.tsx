@@ -72,7 +72,7 @@ export default function ProductsManager() {
         originalPrice: "",
         categoryId: "",
         subcategoryId: "",
-        imageUrl: "",
+        imageUrl: "", // Main image (first match in images array)
         images: [],
         available: true,
         featured: false,
@@ -145,6 +145,18 @@ export default function ProductsManager() {
                 ...prev,
                 images: updatedImages,
                 imageUrl: updatedImages.length > 0 ? updatedImages[0] : ""
+            };
+        });
+    };
+
+    const addImageUrl = (url: string) => {
+        if (!url) return;
+        setFormData(prev => {
+            const updatedImages = [...prev.images, url];
+            return {
+                ...prev,
+                images: updatedImages,
+                imageUrl: prev.imageUrl || url
             };
         });
     };
@@ -330,15 +342,33 @@ export default function ProductsManager() {
                                         }))}
                                         onRemove={(index) => removeImage(index)}
                                     />
-                                    <div className="mt-2">
-                                        <label className="block text-xs text-gray-500 mb-1">Primary Image URL (Optional override)</label>
+                                    <div className="mt-4 flex gap-2">
                                         <input
                                             type="url"
-                                            value={formData.imageUrl}
-                                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                                            placeholder="https://..."
-                                            className="w-full px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-amber-500"
+                                            placeholder="Or paste image URL here..."
+                                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-amber-500"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    addImageUrl(e.currentTarget.value);
+                                                    e.currentTarget.value = '';
+                                                }
+                                            }}
+                                            id="url-input"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const input = document.getElementById('url-input') as HTMLInputElement;
+                                                if (input) {
+                                                    addImageUrl(input.value);
+                                                    input.value = '';
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                                        >
+                                            Add Link
+                                        </button>
                                     </div>
                                 </div>
                             </div>

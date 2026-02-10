@@ -1,4 +1,4 @@
-import { getProducts, getCategories, getOffers, searchProducts, Product, Category, Offer } from "@/lib/data";
+import { getProducts, getCategories, getOffers, searchProducts, Product, Category, Offer, getSiteContent, ProductsPageContent } from "@/app/actions";
 import Link from "next/link";
 import { Package, Search, ChevronRight, Zap, Tag } from "lucide-react";
 import Image from "next/image";
@@ -14,9 +14,17 @@ export default async function ProductsPage({
     const params = await searchParams;
 
     // Fetch data
-    const products: Product[] = await getProducts();
-    const categories: Category[] = await getCategories();
-    const offers: Offer[] = await getOffers();
+    const productsPromise = getProducts();
+    const categoriesPromise = getCategories();
+    const offersPromise = getOffers();
+    const contentPromise = getSiteContent<ProductsPageContent>("products-page");
+
+    const [products, categories, offers, pageContent] = await Promise.all([
+        productsPromise,
+        categoriesPromise,
+        offersPromise,
+        contentPromise
+    ]);
 
     // Note: In a real app with large data, search/filter should happen on server (Database query)
     // For now, we are fetching all and filtering in memory or using the searchProducts action if implemented efficiently
@@ -38,12 +46,22 @@ export default async function ProductsPage({
     // Simple availability filter (optional, maybe user wants to see out of stock items too)
     filteredProducts = filteredProducts.filter(p => p.available);
 
+    const heroTitle = pageContent?.heroTitle || "Our Box";
+    const heroSubtitle = pageContent?.heroSubtitle || "Browse our curated collection of premium products.";
+    const heroImage = pageContent?.heroImage || "";
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Tech Header */}
             <div className="bg-brand-dark pt-32 pb-12 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[#0A0A0A]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/20 via-transparent to-transparent" />
+                {heroImage ? (
+                    <div className="absolute inset-0 opacity-40">
+                        <Image src={heroImage} alt="Hero Background" fill className="object-cover" />
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/20 via-transparent to-transparent" />
+                )}
 
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="flex flex-col md:flex-row items-end justify-between gap-6">
@@ -53,10 +71,10 @@ export default async function ProductsPage({
                                 <span>INVENTORY_STATUS: LIVE</span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-                                Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-cyan-400">Box</span>
+                                {heroTitle}
                             </h1>
                             <p className="text-slate-400 mt-2 max-w-lg">
-                                Browse our curated collection of premium products.
+                                {heroSubtitle}
                             </p>
                         </div>
                     </div>

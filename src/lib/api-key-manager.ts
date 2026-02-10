@@ -31,6 +31,7 @@ const FIRESTORE_CACHE_MS = 60 * 1000; // 1 minute
 
 export interface KeyInfo {
     key: string;
+    id?: string;
     provider: LLMProvider;
 }
 
@@ -61,20 +62,20 @@ class APIKeyManager {
             process.env.GEMINI_API_KEY_1,
             process.env.GEMINI_API_KEY_2,
             process.env.GEMINI_API_KEY_3,
-        ].forEach(key => {
+        ].forEach((key, index) => {
             if (key && key.trim() !== "") {
-                envKeys.push({ key: key.trim(), provider: "google" });
+                envKeys.push({ key: key.trim(), provider: "google", id: `env-google-${index + 1}` });
             }
         });
 
         // OpenAI keys
         if (process.env.OPENAI_API_KEY) {
-            envKeys.push({ key: process.env.OPENAI_API_KEY.trim(), provider: "openai" });
+            envKeys.push({ key: process.env.OPENAI_API_KEY.trim(), provider: "openai", id: "env-openai" });
         }
 
         // Anthropic keys
         if (process.env.ANTHROPIC_API_KEY) {
-            envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic" });
+            envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic", id: "env-anthropic" });
         }
 
         // Groq keys - support GROQ_API_KEY_1 through GROQ_API_KEY_10 for rotation
@@ -90,7 +91,7 @@ class APIKeyManager {
             const val = process.env[name];
             if (val && val.trim() !== "" && !seenGroqKeys.has(val.trim())) {
                 seenGroqKeys.add(val.trim());
-                envKeys.push({ key: val.trim(), provider: "groq" });
+                envKeys.push({ key: val.trim(), provider: "groq", id: `env-groq-${name}` });
             }
         });
 
@@ -126,18 +127,18 @@ class APIKeyManager {
                 process.env.GEMINI_API_KEY_1,
                 process.env.GEMINI_API_KEY_2,
                 process.env.GEMINI_API_KEY_3,
-            ].forEach(key => {
+            ].forEach((key, index) => {
                 if (key && key.trim() !== "") {
-                    envKeys.push({ key: key.trim(), provider: "google" });
+                    envKeys.push({ key: key.trim(), provider: "google", id: `env-google-${index + 1}` });
                 }
             });
 
             if (process.env.OPENAI_API_KEY) {
-                envKeys.push({ key: process.env.OPENAI_API_KEY.trim(), provider: "openai" });
+                envKeys.push({ key: process.env.OPENAI_API_KEY.trim(), provider: "openai", id: "env-openai" });
             }
 
             if (process.env.ANTHROPIC_API_KEY) {
-                envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic" });
+                envKeys.push({ key: process.env.ANTHROPIC_API_KEY.trim(), provider: "anthropic", id: "env-anthropic" });
             }
 
             // Groq keys - support GROQ_API_KEY_1 through GROQ_API_KEY_10 for rotation
@@ -153,7 +154,7 @@ class APIKeyManager {
                 const val = process.env[name];
                 if (val && val.trim() !== "" && !seenGroqKeys.has(val.trim())) {
                     seenGroqKeys.add(val.trim());
-                    envKeys.push({ key: val.trim(), provider: "groq" });
+                    envKeys.push({ key: val.trim(), provider: "groq", id: `env-groq-${name}` });
                 }
             });
 
@@ -187,6 +188,7 @@ class APIKeyManager {
             }
             return {
                 key: info.key,
+                id: info.id,
                 provider: info.provider,
                 index,
                 callCount: 0,
@@ -328,6 +330,7 @@ class APIKeyManager {
                 cooldownRemaining: key.cooldownUntil
                     ? Math.max(0, Math.ceil((key.cooldownUntil.getTime() - now.getTime()) / 1000))
                     : null,
+                id: key.id
             })),
         };
     }

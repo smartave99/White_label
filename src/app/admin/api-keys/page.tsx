@@ -32,7 +32,7 @@ import {
     Sparkles,
     Brain
 } from "lucide-react";
-import { LLMProvider } from "@/types/assistant-types";
+import { LLMProvider, APIKeyManagerStatus } from "@/types/assistant-types";
 import Link from "next/link";
 
 export default function APIKeyManager() {
@@ -44,19 +44,7 @@ export default function APIKeyManager() {
     const [testingKeyId, setTestingKeyId] = useState<string | null>(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [showKeyValue, setShowKeyValue] = useState<Record<string, boolean>>({});
-    const [healthStatus, setHealthStatus] = useState<{
-        totalKeys: number;
-        activeKeyIndex: number;
-        keys: Array<{
-            index: number;
-            maskedKey: string;
-            callCount: number;
-            isActive: boolean;
-            isHealthy: boolean;
-            rateLimited: boolean;
-            cooldownRemaining: number | null;
-        }>;
-    } | null>(null);
+    const [healthStatus, setHealthStatus] = useState<APIKeyManagerStatus | null>(null);
 
     const [formData, setFormData] = useState<{
         name: string;
@@ -328,130 +316,144 @@ export default function APIKeyManager() {
                         </div>
                     ) : (
                         <div className="divide-y divide-gray-100">
-                            {keys.map((keyItem) => (
-                                <div key={keyItem.id} className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
-                                    <div className="flex-shrink-0">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${keyItem.isActive
-                                            ? keyItem.isValid === true
-                                                ? 'bg-green-100'
-                                                : keyItem.isValid === false
-                                                    ? 'bg-red-100'
-                                                    : 'bg-amber-100'
-                                            : 'bg-gray-100'
-                                            }`}>
-                                            <Key className={`w-5 h-5 ${keyItem.isActive
-                                                ? keyItem.isValid === true
-                                                    ? 'text-green-600'
-                                                    : keyItem.isValid === false
-                                                        ? 'text-red-600'
-                                                        : 'text-amber-600'
-                                                : 'text-gray-400'
-                                                }`} />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="font-semibold text-gray-800 truncate">{keyItem.name}</h4>
-                                            <span className={`px-2 py-0.5 text-xs rounded flex items-center gap-1 border ${keyItem.provider === 'openai' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                keyItem.provider === 'anthropic' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                                                    'bg-blue-50 text-blue-700 border-blue-200'
+                            {keys.map((keyItem) => {
+                                const health = healthStatus?.keys.find(k => k.id === keyItem.id);
+                                return (
+                                    <div key={keyItem.id} className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                                        <div className="flex-shrink-0">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${keyItem.isActive
+                                                ? health?.rateLimited
+                                                    ? 'bg-amber-100'
+                                                    : keyItem.isValid === true
+                                                        ? 'bg-green-100'
+                                                        : keyItem.isValid === false
+                                                            ? 'bg-red-100'
+                                                            : 'bg-amber-100'
+                                                : 'bg-gray-100'
                                                 }`}>
-                                                {keyItem.provider === 'openai' && <Bot className="w-3 h-3" />}
-                                                {keyItem.provider === 'anthropic' && <Brain className="w-3 h-3" />}
-                                                {(!keyItem.provider || keyItem.provider === 'google') && <Sparkles className="w-3 h-3" />}
-                                                {keyItem.provider === 'openai' ? 'OpenAI' : keyItem.provider === 'anthropic' ? 'Anthropic' : 'Gemini'}
-                                            </span>
-                                            {!keyItem.isActive && (
-                                                <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">
-                                                    Disabled
-                                                </span>
-                                            )}
-                                            {keyItem.isValid === true && (
-                                                <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded flex items-center gap-1">
-                                                    <CheckCircle className="w-3 h-3" /> Valid
-                                                </span>
-                                            )}
-                                            {keyItem.isValid === false && (
-                                                <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded flex items-center gap-1">
-                                                    <XCircle className="w-3 h-3" /> Invalid
-                                                </span>
-                                            )}
-                                            {keyItem.isValid === null && keyItem.isActive && (
-                                                <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded flex items-center gap-1">
-                                                    <AlertCircle className="w-3 h-3" /> Untested
-                                                </span>
-                                            )}
+                                                <Key className={`w-5 h-5 ${keyItem.isActive
+                                                    ? health?.rateLimited
+                                                        ? 'text-amber-600'
+                                                        : keyItem.isValid === true
+                                                            ? 'text-green-600'
+                                                            : keyItem.isValid === false
+                                                                ? 'text-red-600'
+                                                                : 'text-amber-600'
+                                                    : 'text-gray-400'
+                                                    }`} />
+                                            </div>
                                         </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="font-semibold text-gray-800 truncate">{keyItem.name}</h4>
+                                                <span className={`px-2 py-0.5 text-xs rounded flex items-center gap-1 border ${keyItem.provider === 'openai' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                    keyItem.provider === 'anthropic' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                                        'bg-blue-50 text-blue-700 border-blue-200'
+                                                    }`}>
+                                                    {keyItem.provider === 'openai' && <Bot className="w-3 h-3" />}
+                                                    {keyItem.provider === 'anthropic' && <Brain className="w-3 h-3" />}
+                                                    {(!keyItem.provider || keyItem.provider === 'google') && <Sparkles className="w-3 h-3" />}
+                                                    {keyItem.provider === 'openai' ? 'OpenAI' : keyItem.provider === 'anthropic' ? 'Anthropic' : 'Gemini'}
+                                                </span>
+                                                {!keyItem.isActive && (
+                                                    <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">
+                                                        Disabled
+                                                    </span>
+                                                )}
+                                                {health?.rateLimited && (
+                                                    <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded flex items-center gap-1 animate-pulse">
+                                                        <AlertCircle className="w-3 h-3" /> Rate Limited
+                                                    </span>
+                                                )}
+                                                {keyItem.isValid === true && !health?.rateLimited && (
+                                                    <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded flex items-center gap-1">
+                                                        <CheckCircle className="w-3 h-3" /> Valid
+                                                    </span>
+                                                )}
+                                                {keyItem.isValid === false && (
+                                                    <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded flex items-center gap-1">
+                                                        <XCircle className="w-3 h-3" /> Invalid
+                                                    </span>
+                                                )}
+                                                {keyItem.isValid === null && keyItem.isActive && !health?.rateLimited && (
+                                                    <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-600 rounded flex items-center gap-1">
+                                                        <AlertCircle className="w-3 h-3" /> Untested
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                <div className="flex items-center gap-2">
+                                                    <code className="font-mono">
+                                                        {showKeyValue[keyItem.id] ? keyItem.key : keyItem.maskedKey}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => toggleShowKey(keyItem.id)}
+                                                        className="p-1 hover:bg-gray-200 rounded"
+                                                    >
+                                                        {showKeyValue[keyItem.id] ? (
+                                                            <EyeOff className="w-3 h-3" />
+                                                        ) : (
+                                                            <Eye className="w-3 h-3" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                {health && (
+                                                    <span className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-0.5 rounded">
+                                                        Calls: <strong>{health.callCount}</strong>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
                                         <div className="flex items-center gap-2">
-                                            <code className="text-sm text-gray-500 font-mono">
-                                                {showKeyValue[keyItem.id] ? keyItem.key : keyItem.maskedKey}
-                                            </code>
                                             <button
-                                                onClick={() => toggleShowKey(keyItem.id)}
-                                                className="p-1 hover:bg-gray-200 rounded"
+                                                onClick={() => handleTestKey(keyItem.id)}
+                                                disabled={testingKeyId === keyItem.id}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                                                title="Test Key"
                                             >
-                                                {showKeyValue[keyItem.id] ? (
-                                                    <EyeOff className="w-4 h-4 text-gray-400" />
+                                                {testingKeyId === keyItem.id ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
                                                 ) : (
-                                                    <Eye className="w-4 h-4 text-gray-400" />
+                                                    <Zap className="w-5 h-5" />
                                                 )}
                                             </button>
+                                            <button
+                                                onClick={() => handleToggleActive(keyItem.id, keyItem.isActive)}
+                                                className={`p-2 rounded-lg transition-colors ${keyItem.isActive
+                                                    ? 'text-green-600 hover:bg-green-50'
+                                                    : 'text-gray-400 hover:bg-gray-100'
+                                                    }`}
+                                                title={keyItem.isActive ? "Disable" : "Enable"}
+                                            >
+                                                {keyItem.isActive ? (
+                                                    <CheckCircle className="w-5 h-5" />
+                                                ) : (
+                                                    <XCircle className="w-5 h-5" />
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(keyItem.id)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
                                         </div>
-                                        {keyItem.lastTested && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Last tested: {new Date(keyItem.lastTested).toLocaleString()}
-                                            </p>
-                                        )}
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleTestKey(keyItem.id)}
-                                            disabled={testingKeyId === keyItem.id}
-                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                                            title="Test Key"
-                                        >
-                                            {testingKeyId === keyItem.id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                <Zap className="w-5 h-5" />
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={() => handleToggleActive(keyItem.id, keyItem.isActive)}
-                                            className={`p-2 rounded-lg transition-colors ${keyItem.isActive
-                                                ? 'text-green-600 hover:bg-green-50'
-                                                : 'text-gray-400 hover:bg-gray-100'
-                                                }`}
-                                            title={keyItem.isActive ? "Disable" : "Enable"}
-                                        >
-                                            {keyItem.isActive ? (
-                                                <CheckCircle className="w-5 h-5" />
-                                            ) : (
-                                                <XCircle className="w-5 h-5" />
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(keyItem.id)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
-                </div>
 
-                {/* Help Text */}
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                    <strong>💡 Tip:</strong> Add multiple API keys for redundancy. The system will automatically
-                    rotate to backup keys if the primary key gets rate-limited or encounters errors.
-                </div>
-            </div>
-        </div>
+                    {/* Help Text */}
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                        <strong>💡 Tip:</strong> Add multiple API keys for redundancy. The system will automatically
+                        rotate to backup keys if the primary key gets rate-limited or encounters errors.
+                    </div>
+                </div >
+            </div >
+        </div >
     );
 }

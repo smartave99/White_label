@@ -8,6 +8,7 @@ export type LLMProvider = "google" | "openai" | "anthropic" | "groq";
 
 export interface APIKeyConfig {
     key: string;
+    id?: string; // Optional Firestore ID or env identifier
     provider: LLMProvider;
     index: number;
     callCount: number;
@@ -20,6 +21,7 @@ export interface APIKeyConfig {
 
 export interface KeyHealthStatus {
     index: number;
+    id?: string;
     provider: LLMProvider;
     maskedKey: string;
     callCount: number;
