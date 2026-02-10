@@ -5,15 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getSiteContent, updateSiteContent, AboutPageContent } from "@/app/actions";
 import {
-    Users,
-    MapPin,
-    Clock,
-    Phone,
-    Settings,
-    Image as ImageIcon,
     Save,
     Loader2,
-    Trash2,
     ArrowLeft
 } from "lucide-react";
 import Link from "next/link";

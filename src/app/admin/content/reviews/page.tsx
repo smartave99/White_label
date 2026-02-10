@@ -5,16 +5,7 @@ import { getAllReviews, deleteReview, Review } from "@/app/actions";
 import {
     Star,
     MessageSquare,
-    Filter,
-    CheckCircle2,
-    XCircle,
-    MoreVertical,
-    ChevronLeft,
-    ChevronRight,
-    Search,
     Trash2,
-    ThumbsUp,
-    Flag,
     ExternalLink,
     Loader2
 } from "lucide-react";
