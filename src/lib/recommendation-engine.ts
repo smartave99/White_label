@@ -69,14 +69,14 @@ export async function getRecommendations(
         // @ts-expect-error - requestProduct is added in extended interface in llm-service
         if (intentResponse.requestProduct) {
             const { createProductRequest } = await import("@/app/actions/product-requests");
-            // @ts-expect-error
+            // @ts-expect-error - dynamic import needs type assertion
             await createProductRequest(intentResponse.requestProduct.name, intentResponse.requestProduct.description);
 
             return {
                 success: true,
                 intent,
                 recommendations: [],
-                summary: `I've noted your request for "${// @ts-expect-error
+                summary: `I've noted your request for "${// @ts-expect-error - intentResponse type intersection issue
                     intentResponse.requestProduct.name}". I've sent this to our team, and we'll look into adding it to our inventory!`,
                 processingTime: Date.now() - startTime,
             };

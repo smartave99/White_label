@@ -47,7 +47,7 @@ export function Reviews({ productId, reviews, averageRating = 0, reviewCount = 0
             } else {
                 setError(result.error as string);
             }
-        } catch (_) {
+        } catch {
             setError("Failed to submit review");
         } finally {
             setIsSubmitting(false);
