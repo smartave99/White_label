@@ -74,6 +74,13 @@ export default function AssistantChat() {
         }
     }, [isOpen]);
 
+    // Listen for custom open event
+    useEffect(() => {
+        const handleOpenChat = () => setIsOpen(true);
+        window.addEventListener("open-assistant-chat", handleOpenChat);
+        return () => window.removeEventListener("open-assistant-chat", handleOpenChat);
+    }, []);
+
     const handleSend = async () => {
         if (!inputValue.trim() || isLoading) return;
 

@@ -78,7 +78,7 @@ export default function Hero({ content }: { content?: HeroContent }) {
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </Link>
-                            <Link href="/about">
+                            <Link href="/offers">
                                 <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-medium backdrop-blur-md transition-all">
                                     Learn More
                                 </button>

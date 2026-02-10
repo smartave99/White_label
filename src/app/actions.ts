@@ -554,6 +554,82 @@ export async function getProduct(id: string): Promise<Product | null> {
 
 // ==================== REVIEWS ====================
 
+// Add new product
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function createProduct(data: any) {
+    try {
+        const docRef = await getAdminDb().collection("products").add({
+            ...data,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+
+        return { success: true, id: docRef.id };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+// Update product
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function updateProduct(id: string, data: any) {
+    try {
+        await getAdminDb().collection("products").doc(id).update({
+            ...data,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+        revalidatePath(`/product/${id}`);
+
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+// Delete product
+export async function deleteProduct(id: string) {
+    try {
+        await getAdminDb().collection("products").doc(id).delete();
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+// Toggle product availability
+export async function toggleProductAvailability(id: string, available: boolean) {
+    try {
+        await getAdminDb().collection("products").doc(id).update({
+            available,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+        revalidatePath(`/product/${id}`);
+
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+}
+
+// ==================== REVIEWS ====================
+
 export interface Review {
     id: string;
     productId: string;

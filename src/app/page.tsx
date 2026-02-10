@@ -3,6 +3,7 @@ import Highlights from "@/components/Highlights";
 import { getSiteContent, HeroContent } from "@/app/actions";
 import Link from "next/link";
 import { CheckCircle2, ShieldCheck, Zap, Globe, ArrowRight } from "lucide-react";
+import ChatTriggerButton from "@/components/ChatTriggerButton";
 
 export const dynamic = "force-dynamic";
 
@@ -84,17 +85,12 @@ export default async function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/products"
+              href="/departments"
               className="px-8 py-4 bg-brand-lime hover:bg-lime-400 text-brand-dark font-bold rounded-full transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(132,204,22,0.4)]"
             >
               Start Shopping <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link
-              href="/register"
-              className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-full transition-all"
-            >
-              Create Account
-            </Link>
+            <ChatTriggerButton />
           </div>
         </div>
       </section>
