@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { getDashboardStats } from "@/app/actions";
 import {
     LogOut,
     LayoutDashboard,
@@ -25,6 +26,7 @@ const navItems = [
     { name: "Offers", href: "/admin/content/offers", icon: Megaphone },
     { name: "Categories", href: "/admin/content/categories", icon: Tag },
     { name: "Gallery", href: "/admin/content/gallery", icon: Image },
+    { name: "Reviews", href: "/admin/reviews", icon: Megaphone }, // Using Megaphone as placeholder or similar
     { name: "Hero Section", href: "/admin/content/hero", icon: LayoutDashboard },
     { name: "Staff Management", href: "/admin/staff", icon: Users },
     { name: "Station Info", href: "/admin/content/contact", icon: Phone },
@@ -38,12 +40,19 @@ export default function AdminDashboard() {
     const { user, loading: authLoading, logout, role } = useAuth();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [stats, setStats] = useState({ offersCount: 0, productsCount: 0, categoriesCount: 0 });
 
     useEffect(() => {
         if (!authLoading && !user) {
             router.push("/admin/login");
         }
     }, [authLoading, user, router]);
+
+    useEffect(() => {
+        if (user) {
+            getDashboardStats().then(setStats);
+        }
+    }, [user]);
 
     const handleLogout = async () => {
         await logout();
@@ -201,15 +210,26 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* Quick Stats Placeholder */}
+                            {/* Offers Card */}
                             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                                 <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                     <Megaphone className="w-4 h-4 text-brand-gold" />
                                     Active Offers
                                 </h4>
-                                <p className="text-3xl font-serif text-brand-green">3</p>
+                                <p className="text-3xl font-serif text-brand-green">{stats.offersCount}</p>
                                 <p className="text-xs text-gray-500 mt-1">Live on store</p>
                             </div>
+
+                            {/* Products Card */}
+                            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <ShoppingBag className="w-4 h-4 text-brand-blue" />
+                                    Total Products
+                                </h4>
+                                <p className="text-3xl font-serif text-brand-green">{stats.productsCount}</p>
+                                <p className="text-xs text-gray-500 mt-1">In catalog</p>
+                            </div>
+
                         </div>
                     </div>
                 </div>

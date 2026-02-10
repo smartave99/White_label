@@ -18,18 +18,49 @@ interface Message {
 
 export default function AssistantChat() {
     const [isOpen, setIsOpen] = useState(false);
-    const [input, setInput] = useState("");
+    const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "welcome",
-            role: "assistant",
-            content: "Hi! I'm your Smart Shopping Assistant. I can help you find products based on your needs. Try saying 'I need running shoes under 5000' or 'Show me gifts for a techie'.",
-            timestamp: new Date()
-        }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Load messages from local storage on mount
+    useEffect(() => {
+        const savedMessages = localStorage.getItem("assistant_chat_history");
+        if (savedMessages) {
+            try {
+                const parsed = JSON.parse(savedMessages);
+                // Simple validation to ensure it's an array
+                if (Array.isArray(parsed)) {
+                    // Re-hydrate Date objects
+                    const hydratedMessages = parsed.map(msg => ({
+                        ...msg,
+                        timestamp: new Date(msg.timestamp)
+                    }));
+                    setMessages(hydratedMessages);
+                }
+            } catch (e) {
+                console.error("Failed to parse chat history", e);
+            }
+        } else {
+            // Initial greeting if no history
+            setMessages([
+                {
+                    id: "welcome",
+                    role: "assistant",
+                    content: "Hi! I'm your Smart Shopping Assistant. I can help you find products or take requests for items we don't have yet. Try saying 'I need running shoes' or 'Request a new product'.",
+                    timestamp: new Date(),
+                },
+            ]);
+        }
+    }, []);
+
+    // Save messages to local storage whenever they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem("assistant_chat_history", JSON.stringify(messages));
+        }
+    }, [messages]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -43,19 +74,18 @@ export default function AssistantChat() {
         }
     }, [isOpen]);
 
-    const handleSend = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-        if (!input.trim() || isLoading) return;
+    const handleSend = async () => {
+        if (!inputValue.trim() || isLoading) return;
 
         const userMessage: Message = {
             id: Date.now().toString(),
             role: "user",
-            content: input.trim(),
+            content: inputValue.trim(),
             timestamp: new Date()
         };
 
         setMessages(prev => [...prev, userMessage]);
-        setInput("");
+        setInputValue("");
         setIsLoading(true);
 
         try {
@@ -249,15 +279,15 @@ export default function AssistantChat() {
                                 <input
                                     ref={inputRef}
                                     type="text"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
                                     placeholder="Ask for anything..."
                                     disabled={isLoading}
                                     className="w-full bg-slate-100 border-0 rounded-full py-3 pl-4 pr-12 text-sm focus:ring-2 focus:ring-brand-blue/50 focus:bg-white transition-all"
                                 />
                                 <button
                                     type="submit"
-                                    disabled={!input.trim() || isLoading}
+                                    disabled={!inputValue.trim() || isLoading}
                                     className="absolute right-1.5 p-2 bg-brand-blue text-white rounded-full disabled:opacity-50 disabled:bg-slate-300 transition-colors hover:bg-brand-dark"
                                 >
                                     <Send className="w-4 h-4" />

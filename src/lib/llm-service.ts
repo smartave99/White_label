@@ -13,6 +13,14 @@ import {
 } from "@/types/assistant-types";
 import { Product, Category } from "@/app/actions";
 
+// Extended intent response to include product requests
+interface GenericIntentResponse extends LLMIntentResponse {
+    requestProduct?: {
+        name: string;
+        description: string;
+    } | null;
+}
+
 const MAX_RETRIES = 3;
 
 const GROQ_API_BASE = "https://api.groq.com/openai/v1/chat/completions";
@@ -245,6 +253,9 @@ ${categoryList}
 
 Customer query: "${query}"
 
+If the customer is asking for a product that is clearly NOT in our categories or is explicitly requesting a new item we don't stock, identify it as a "request".
+Otherwise, treat it as a search for existing products.
+
 Respond with a JSON object (and nothing else) in this exact format:
 {
   "category": "category ID from the list above, or null if unclear",
@@ -254,11 +265,12 @@ Respond with a JSON object (and nothing else) in this exact format:
   "budgetMax": null or number in INR (e.g., if they say "under 500", set this to 500),
   "preferences": ["any stated preferences like 'premium', 'simple', 'colorful', etc."],
   "useCase": "brief description of what they want to use the product for",
-  "confidence": 0.0 to 1.0 indicating how confident you are in understanding their intent
+  "confidence": 0.0 to 1.0 indicating how confident you are in understanding their intent,
+  "requestProduct": null or { "name": "product name", "description": "details" } if they are requesting a new item
 }`;
 
     const response = await callLLM(prompt, provider);
-    return parseJSONFromResponse<LLMIntentResponse>(response);
+    return parseJSONFromResponse<GenericIntentResponse>(response);
 }
 
 /**
@@ -365,7 +377,17 @@ export async function rankAndSummarize(
         tags: p.tags,
     }));
 
-    const prompt = `You are a product recommendation assistant for Smart Avenue retail store in India.
+    const prompt = `You are an expert sales associate for Smart Avenue, known for being the world's best salesperson.
+You are creative, persuasive, and charming.
+
+CRITICAL INSTRUCTION:
+- You MUST detect the language of the Customer Query.
+- You MUST reply in the SAME language as the query.
+- If the user asks in Hindi, reply in Hindi.
+- If the user asks in Urdu, reply in Urdu.
+- If the user asks in Hinglish, reply in Hinglish.
+- If the user asks in English, reply in English.
+- Be culturally relevant to Indian shoppers.
 
 Customer query: "${query}"
 
@@ -380,7 +402,7 @@ ${JSON.stringify(productList, null, 2)}
 
 Do two things:
 1. Rank the top 3-5 most suitable products for this customer
-2. Write a brief, friendly 1-2 sentence summary to introduce the recommendations
+3. Write a creative, persuasive, and personalized summary to introduce the recommendations. Speak directly to the customer.
 
 Respond with a JSON object (and nothing else) in this exact format:
 {
@@ -389,10 +411,10 @@ Respond with a JSON object (and nothing else) in this exact format:
       "productId": "the product ID",
       "matchScore": 0-100 indicating how well it matches,
       "highlights": ["key features that match their needs"],
-      "whyRecommended": "A 1-2 sentence explanation"
+      "whyRecommended": "A persuasive 1-2 sentence pitch for this product"
     }
   ],
-  "summary": "A brief, friendly 1-2 sentence summary for the customer"
+  "summary": "A creative, charming, and persuasive summary for the customer, in their language"
 }
 
 Only include relevant products. If no products match well, return empty rankings.`;

@@ -65,6 +65,23 @@ export async function getRecommendations(
         const intentResponse = await analyzeIntent(query, categories);
         const intent = mapIntentResponse(intentResponse);
 
+        // Handle product request
+        // @ts-ignore - requestProduct is added in extended interface in llm-service
+        if (intentResponse.requestProduct) {
+            const { createProductRequest } = await import("@/app/actions");
+            // @ts-ignore
+            await createProductRequest(intentResponse.requestProduct.name, intentResponse.requestProduct.description);
+
+            return {
+                success: true,
+                intent,
+                recommendations: [],
+                summary: `I've noted your request for "${// @ts-ignore
+                    intentResponse.requestProduct.name}". I've sent this to our team, and we'll look into adding it to our inventory!`,
+                processingTime: Date.now() - startTime,
+            };
+        }
+
         // Step 3: Query relevant products (cached in getProducts)
         const products = await queryProducts(intent, request.context);
 

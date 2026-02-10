@@ -8,6 +8,7 @@
 
 import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { getAPIKeyManager, resetAPIKeyManager } from "@/lib/api-key-manager";
+import { revalidatePath } from "next/cache";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const GEMINI_MODEL = "gemini-2.0-flash";
@@ -98,6 +99,8 @@ export async function addAPIKey(name: string, key: string, provider: LLMProvider
         // Invalidate API key manager cache
         resetAPIKeyManager();
 
+        revalidatePath("/admin/api-keys");
+
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("[addAPIKey] Error:", error);
@@ -128,6 +131,8 @@ export async function updateAPIKey(id: string, data: { name?: string; key?: stri
         // Invalidate API key manager cache
         resetAPIKeyManager();
 
+        revalidatePath("/admin/api-keys");
+
         return { success: true };
     } catch (error) {
         console.error("[updateAPIKey] Error:", error);
@@ -144,6 +149,8 @@ export async function deleteAPIKey(id: string) {
 
         // Invalidate API key manager cache
         resetAPIKeyManager();
+
+        revalidatePath("/admin/api-keys");
 
         return { success: true };
     } catch (error) {

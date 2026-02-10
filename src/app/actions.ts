@@ -2,6 +2,7 @@
 
 import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { getSearchCache, CacheKeys } from "@/lib/search-cache";
+import { revalidatePath } from "next/cache";
 
 // ==================== OFFERS ====================
 
@@ -21,6 +22,11 @@ export async function createOffer(title: string, discount: string, description: 
             description,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/offers");
+        revalidatePath("/admin/content/offers");
+        revalidatePath("/admin"); // For dashboard stats matches
+
         return { success: true, id: docRef.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -44,6 +50,11 @@ export async function getOffers(): Promise<Offer[]> {
 export async function deleteOffer(id: string) {
     try {
         await getAdminDb().collection("offers").doc(id).delete();
+
+        revalidatePath("/offers");
+        revalidatePath("/admin/content/offers");
+        revalidatePath("/admin");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -66,6 +77,10 @@ export async function addGalleryImage(imageUrl: string, storagePath: string) {
             storagePath,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/gallery");
+        revalidatePath("/admin/content/gallery");
+
         return { success: true, id: docRef.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -89,6 +104,10 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
 export async function deleteGalleryImage(id: string) {
     try {
         await getAdminDb().collection("gallery").doc(id).delete();
+
+        revalidatePath("/gallery");
+        revalidatePath("/admin/content/gallery");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -171,6 +190,9 @@ export async function updateSiteContent(section: string, data: Record<string, un
             ...data,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
+
+        revalidatePath("/", "layout"); // Revalidate everything as site content (like contact info) can be global
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -198,6 +220,9 @@ export async function updateDepartments(departments: DepartmentContent[]) {
             items: departments,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/"); // Departments are usually on home page
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -238,6 +263,9 @@ export async function createStaffMember(email: string, name: string, role: strin
             permissions,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/admin/staff");
+
         return { success: true, id: docRef.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -250,6 +278,9 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>) 
             ...data,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/admin/staff");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -259,6 +290,9 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>) 
 export async function deleteStaffMember(id: string) {
     try {
         await getAdminDb().collection("staff").doc(id).delete();
+
+        revalidatePath("/admin/staff");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -335,6 +369,10 @@ export async function createCategory(name: string, parentId: string | null = nul
             order,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/products"); // Categories appear in product filters
+        revalidatePath("/admin/content/categories");
+
         return { success: true, id: docRef.id };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -347,6 +385,10 @@ export async function updateCategory(id: string, data: Partial<Category>) {
             ...data,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        revalidatePath("/products");
+        revalidatePath("/admin/content/categories");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -356,6 +398,10 @@ export async function updateCategory(id: string, data: Partial<Category>) {
 export async function deleteCategory(id: string) {
     try {
         await getAdminDb().collection("categories").doc(id).delete();
+
+        revalidatePath("/products");
+        revalidatePath("/admin/content/categories");
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
@@ -378,6 +424,8 @@ export interface Product {
     featured: boolean;
     offerId?: string;
     tags: string[];
+    averageRating?: number;
+    reviewCount?: number;
     createdAt: Date;
     updatedAt?: Date;
 }
@@ -502,48 +550,165 @@ export async function getProduct(id: string): Promise<Product | null> {
     }
 }
 
-export async function createProduct(data: Omit<Product, "id" | "createdAt">) {
-    try {
-        const docRef = await getAdminDb().collection("products").add({
-            ...data,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        return { success: true, id: docRef.id };
-    } catch (error: unknown) {
-        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-    }
+// ==================== REVIEWS ====================
+
+export interface Review {
+    id: string;
+    productId: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    comment: string;
+    createdAt: Date;
 }
 
-export async function updateProduct(id: string, data: Partial<Product>) {
+export async function addReview(productId: string, userId: string, userName: string, rating: number, comment: string) {
     try {
-        await getAdminDb().collection("products").doc(id).update({
-            ...data,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        const db = getAdminDb();
+        const reviewRef = db.collection("reviews").doc();
+        const productRef = db.collection("products").doc(productId);
+
+        await db.runTransaction(async (t) => {
+            const productDoc = await t.get(productRef);
+            if (!productDoc.exists) {
+                throw new Error("Product not found");
+            }
+
+            const productData = productDoc.data() as Product;
+            const currentCount = productData.reviewCount || 0;
+            const currentRating = productData.averageRating || 0;
+
+            const newCount = currentCount + 1;
+            const newAverage = ((currentRating * currentCount) + rating) / newCount;
+
+            t.set(reviewRef, {
+                productId,
+                userId,
+                userName,
+                rating,
+                comment,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+            t.update(productRef, {
+                reviewCount: newCount,
+                averageRating: newAverage,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
         });
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }
 
-export async function deleteProduct(id: string) {
+export async function getReviews(productId: string): Promise<Review[]> {
     try {
-        await getAdminDb().collection("products").doc(id).delete();
+        const snapshot = await getAdminDb()
+            .collection("reviews")
+            .where("productId", "==", productId)
+            .orderBy("createdAt", "desc")
+            .get();
+
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+        })) as Review[];
+    } catch (error) {
+        console.error("Error fetching reviews:", error);
+        return [];
+    }
+}
+
+export async function deleteReview(reviewId: string, productId: string, rating: number) {
+    try {
+        const db = getAdminDb();
+        const reviewRef = db.collection("reviews").doc(reviewId);
+        const productRef = db.collection("products").doc(productId);
+
+        await db.runTransaction(async (t) => {
+            const productDoc = await t.get(productRef);
+            if (!productDoc.exists) {
+                throw new Error("Product not found");
+            }
+
+            const productData = productDoc.data() as Product;
+            const currentCount = productData.reviewCount || 0;
+            const currentRating = productData.averageRating || 0;
+
+            if (currentCount <= 1) {
+                t.update(productRef, {
+                    reviewCount: 0,
+                    averageRating: 0,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            } else {
+                const newCount = currentCount - 1;
+                // Calculate new average: (oldAvg * oldCount - ratingToRemove) / newCount
+                const newAverage = ((currentRating * currentCount) - rating) / newCount;
+
+                t.update(productRef, {
+                    reviewCount: newCount,
+                    averageRating: newAverage,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            }
+
+            t.delete(reviewRef);
+        });
+
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }
 
-export async function toggleProductAvailability(id: string, available: boolean) {
+export async function getAllReviews(): Promise<(Review & { productName?: string })[]> {
     try {
-        await getAdminDb().collection("products").doc(id).update({
-            available,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        return { success: true };
-    } catch (error: unknown) {
-        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+        const snapshot = await getAdminDb().collection("reviews").orderBy("createdAt", "desc").limit(50).get();
+        // To show product name, we might need to fetch products or just show ID. 
+        // For efficiency, let's just return reviews and handle product name on frontend or fetch distinct products locally.
+        // A better approach for admin is to fetch basic product info or map it.
+        // Let's just return reviews for now.
+
+        return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+        })) as Review[];
+    } catch (error) {
+        console.error("Error fetching all reviews:", error);
+        return [];
+    }
+}
+
+
+// ==================== DASHBOARD ====================
+
+export async function getDashboardStats() {
+    try {
+        // Use count() aggregations for performance
+        // Note: count() might require specific Firebase Admin SDK version.
+        // If it fails, fallback to retrieving snapshots (slower but works universally)
+
+        const offersSnapshot = await getAdminDb().collection("offers").get();
+        const productsSnapshot = await getAdminDb().collection("products").get();
+        const categoriesSnapshot = await getAdminDb().collection("categories").get();
+
+        return {
+            offersCount: offersSnapshot.size,
+            productsCount: productsSnapshot.size,
+            categoriesCount: categoriesSnapshot.size,
+        };
+    } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        return {
+            offersCount: 0,
+            productsCount: 0,
+            categoriesCount: 0,
+        };
     }
 }
 
