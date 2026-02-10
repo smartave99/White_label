@@ -20,7 +20,7 @@ import {
     Settings,
     Palette,
     LogOut,
-    Menu,
+
     X,
     ChevronDown,
     ChevronRight
