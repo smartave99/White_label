@@ -20,6 +20,7 @@ import Link from "next/link";
 const sections = [
     { id: "hero", label: "Hero Section" },
     { id: "offers", label: "Offers" },
+    { id: "reviews", label: "Reviews" },
     { id: "contact", label: "Contact Info" },
     { id: "departments", label: "Departments" },
 ];

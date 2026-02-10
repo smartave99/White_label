@@ -45,7 +45,7 @@ const navGroups = [
     {
         title: "Content",
         items: [
-            { name: "Reviews", href: "/admin/reviews", icon: MessageSquare }, // Using MessageSquare as generic content icon
+            { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare }, // Using MessageSquare as generic content icon
             { name: "Product Requests", href: "/admin/requests", icon: MessageSquare },
         ]
     },
