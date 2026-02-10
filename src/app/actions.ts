@@ -63,6 +63,27 @@ export async function deleteOffer(id: string) {
     }
 }
 
+// ==================== DASHBOARD STATS ====================
+
+export async function getDashboardStats() {
+    try {
+        const db = getAdminDb();
+        const [offersSnap, productsSnap, categoriesSnap] = await Promise.all([
+            db.collection("offers").get(),
+            db.collection("products").get(),
+            db.collection("categories").get(),
+        ]);
+        return {
+            offersCount: offersSnap.size,
+            productsCount: productsSnap.size,
+            categoriesCount: categoriesSnap.size,
+        };
+    } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        return { offersCount: 0, productsCount: 0, categoriesCount: 0 };
+    }
+}
+
 // ==================== GALLERY ====================
 
 export interface GalleryImage {
