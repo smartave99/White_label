@@ -2,7 +2,7 @@ import Hero from "@/components/Hero";
 import Highlights from "@/components/Highlights";
 import Features from "@/components/Features";
 import CTA from "@/components/CTA";
-import { getSiteContent, HeroContent, FeaturesContent, CTAContent, HighlightsContent } from "@/app/actions";
+import { getSiteContent, FeaturesContent, CTAContent, HighlightsContent } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 

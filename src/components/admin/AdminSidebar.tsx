@@ -10,9 +10,6 @@ import {
     ShoppingBag,
     Megaphone,
     Tag,
-    Star,
-    Zap,
-    MousePointerClick,
     Users,
     MessageSquare,
     Phone,
@@ -30,7 +27,7 @@ import {
 type NavItem = {
     name: string;
     href?: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     subItems?: { name: string; href: string }[];
 };
 

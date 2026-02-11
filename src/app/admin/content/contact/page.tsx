@@ -11,8 +11,7 @@ import {
     Save,
     Phone,
     Mail,
-    MapPin,
-    Clock
+    MapPin
 } from "lucide-react";
 import Link from "next/link";
 

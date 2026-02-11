@@ -9,7 +9,7 @@
  */
 
 import { getProducts, getCategories, Product } from "@/app/actions";
-import { analyzeIntent, rankAndSummarize, handleMissingProduct, generateNoProductFoundResponse } from "./llm-service";
+import { analyzeIntent, rankAndSummarize, handleMissingProduct } from "./llm-service";
 import { getSearchCache, hashQuery } from "./search-cache";
 import {
     RecommendationRequest,
@@ -68,7 +68,6 @@ export async function getRecommendations(
         // Handle explicit product request (using new structure)
         if (intentResponse.productRequestData) {
             const { createProductRequest } = await import("@/app/actions/product-requests");
-            const reqData = intentResponse.productRequestData;
 
             // Check if we have enough info to submit immediately
             const decision = await handleMissingProduct(query, intentResponse, request.messages);
