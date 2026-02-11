@@ -3,28 +3,23 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getSiteContent, updateSiteContent, HeroContent } from "@/app/actions";
+import { getSiteConfig, updateSiteConfig } from "@/app/actions/site-config";
+import { SiteConfig } from "@/types/site-config";
 import {
     Loader2,
     ArrowLeft,
     Save,
-
+    Image as ImageIcon,
+    Type,
+    Link as LinkIcon
 } from "lucide-react";
 import Link from "next/link";
-
-const defaultHero: HeroContent = {
-    title: "All your home needs, simplified.",
-    subtitle: "Smart Avenue",
-    tagline: "Premium Products at Affordable Prices",
-    ctaPrimary: "Explore Products",
-    ctaSecondary: "Join Smart Club",
-    backgroundImage: ""
-};
+import ImageUpload from "@/components/ImageUpload";
 
 export default function HeroEditor() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [content, setContent] = useState<HeroContent>(defaultHero);
+    const [config, setConfig] = useState<SiteConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -37,27 +32,36 @@ export default function HeroEditor() {
 
     useEffect(() => {
         if (user) {
-            loadContent();
+            loadConfig();
         }
     }, [user]);
 
-    const loadContent = async () => {
+    const loadConfig = async () => {
         setLoading(true);
-        const data = await getSiteContent<HeroContent>("hero");
-        if (data) {
-            setContent({ ...defaultHero, ...data });
+        try {
+            const data = await getSiteConfig();
+            setConfig(data);
+        } catch (error) {
+            console.error("Failed to load hero content:", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!config) return;
+
         setSaving(true);
         setSaved(false);
-        const result = await updateSiteContent("hero", content as unknown as Record<string, unknown>);
+
+        const result = await updateSiteConfig(config);
+
         if (result.success) {
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
+        } else {
+            alert("Failed to save changes: " + (result.error || "Unknown error"));
         }
         setSaving(false);
     };
@@ -84,79 +88,138 @@ export default function HeroEditor() {
                     </div>
                 </div>
 
-                {loading ? (
+                {loading || !config ? (
                     <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-amber-600 mx-auto" />
                     </div>
                 ) : (
-                    <form onSubmit={handleSave} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                        <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                                <input
-                                    type="text"
-                                    value={content.subtitle}
-                                    onChange={(e) => setContent({ ...content, subtitle: e.target.value })}
-                                    placeholder="Smart Avenue"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                />
+                    <form onSubmit={handleSave} className="space-y-6">
+                        {/* Text Content */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <Type className="w-5 h-5 text-amber-500" />
+                                Text Content
+                            </h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Main Title</label>
+                                    <input
+                                        type="text"
+                                        value={config.hero.title}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, title: e.target.value }
+                                        })}
+                                        placeholder="Experience International Retail"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                                    <textarea
+                                        value={config.hero.subtitle}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, subtitle: e.target.value }
+                                        })}
+                                        placeholder="Premium groceries, fashion..."
+                                        rows={2}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Main Title</label>
-                                <input
-                                    type="text"
-                                    value={content.title}
-                                    onChange={(e) => setContent({ ...content, title: e.target.value })}
-                                    placeholder="All your home needs, simplified."
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
-                                <input
-                                    type="text"
-                                    value={content.tagline}
-                                    onChange={(e) => setContent({ ...content, tagline: e.target.value })}
-                                    placeholder="Premium Products at Affordable Prices"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                />
-                            </div>
-
+                        {/* Call to Action */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <LinkIcon className="w-5 h-5 text-amber-500" />
+                                Call to Action
+                            </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Primary Button</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
                                     <input
                                         type="text"
-                                        value={content.ctaPrimary}
-                                        onChange={(e) => setContent({ ...content, ctaPrimary: e.target.value })}
-                                        placeholder="Explore Products"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        value={config.hero.ctaText}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, ctaText: e.target.value }
+                                        })}
+                                        placeholder="View Collection"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Button</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Button Link</label>
                                     <input
                                         type="text"
-                                        value={content.ctaSecondary}
-                                        onChange={(e) => setContent({ ...content, ctaSecondary: e.target.value })}
-                                        placeholder="Join Smart Club"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        value={config.hero.ctaLink}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, ctaLink: e.target.value }
+                                        })}
+                                        placeholder="/products"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
                             </div>
+                        </div>
 
+                        {/* Background Image */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <ImageIcon className="w-5 h-5 text-amber-500" />
+                                Background Image
+                            </h3>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Background Image URL</label>
-                                <input
-                                    type="url"
-                                    value={content.backgroundImage}
-                                    onChange={(e) => setContent({ ...content, backgroundImage: e.target.value })}
-                                    placeholder="https://example.com/hero-bg.jpg"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                />
-                                <p className="text-sm text-gray-500 mt-1">Leave empty to use default background</p>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Hero Image</label>
+                                <div className="mb-4">
+                                    <ImageUpload
+                                        folder="hero"
+                                        multiple={false}
+                                        currentImages={config.hero.backgroundImageUrl ? [config.hero.backgroundImageUrl] : []}
+                                        onUpload={(files) => files[0] && setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, backgroundImageUrl: files[0].url }
+                                        })}
+                                        onRemove={() => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, backgroundImageUrl: "" }
+                                        })}
+                                    />
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Image URL (Optional)</label>
+                                        <input
+                                            type="url"
+                                            value={config.hero.backgroundImageUrl}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                hero: { ...config.hero, backgroundImageUrl: e.target.value }
+                                            })}
+                                            placeholder="https://..."
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <label className="block text-sm font-medium text-gray-700">Overlay Opacity</label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.1"
+                                            value={config.hero.overlayOpacity}
+                                            onChange={(e) => setConfig({
+                                                ...config,
+                                                hero: { ...config.hero, overlayOpacity: parseFloat(e.target.value) }
+                                            })}
+                                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        />
+                                        <span className="text-sm text-gray-500 w-8">{config.hero.overlayOpacity}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
