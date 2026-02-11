@@ -2,8 +2,8 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-import { getAdminDb, admin } from '../src/lib/firebase-admin';
-import { createProduct, createCategory } from '../src/app/actions';
+import { getAdminDb } from '../src/lib/firebase-admin';
+import { createProduct, createCategory, Product } from '../src/app/actions';
 
 // Mock data
 const categories = [
@@ -153,7 +153,7 @@ async function seed() {
             subcategoryId: null,
         };
 
-        const res = await createProduct(productData as any);
+        const res = await createProduct(productData as Partial<Product>);
         if (res.success) {
             console.log(`Created product ${p.name}`);
         } else {
