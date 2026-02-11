@@ -727,6 +727,8 @@ export async function addReview(productId: string, userId: string, userName: str
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    } finally {
+        getSearchCache().clearPrefix("products");
     }
 }
 
@@ -789,6 +791,8 @@ export async function deleteReview(reviewId: string, productId: string, rating: 
         return { success: true };
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    } finally {
+        getSearchCache().clearPrefix("products");
     }
 }
 
