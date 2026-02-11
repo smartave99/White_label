@@ -36,7 +36,7 @@ import { LLMProvider, APIKeyManagerStatus } from "@/types/assistant-types";
 import Link from "next/link";
 
 export default function APIKeyManager() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, role, loading: authLoading } = useAuth();
     const router = useRouter();
     const [keys, setKeys] = useState<StoredAPIKey[]>([]);
     const [loading, setLoading] = useState(true);

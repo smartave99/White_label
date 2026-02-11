@@ -26,7 +26,7 @@ const sections = [
 ];
 
 export default function StaffManagement() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, role, loading: authLoading } = useAuth();
     const router = useRouter();
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [loading, setLoading] = useState(true);
