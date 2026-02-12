@@ -16,7 +16,8 @@ export interface ThemeConfig {
     textColor: string;
 }
 
-export interface HeroConfig {
+export interface HeroSlide {
+    id: string;
     title: string;
     subtitle: string;
     ctaText: string;
@@ -24,6 +25,10 @@ export interface HeroConfig {
     learnMoreLink?: string;
     backgroundImageUrl: string;
     overlayOpacity: number;
+}
+
+export interface HeroConfig {
+    slides: HeroSlide[];
 }
 
 export interface PromotionItem {
@@ -45,6 +50,7 @@ export interface FooterSection {
 }
 
 export interface FooterConfig {
+    logoUrl?: string;
     tagline: string;
     socialLinks: {
         facebook: string;
@@ -106,12 +112,17 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         textColor: "#0f172a", // Slate 900
     },
     hero: {
-        title: "Experience International Retail",
-        subtitle: "Premium groceries, fashion, and lifestyle products available at our flagship store.",
-        ctaText: "View Collection",
-        ctaLink: "/products",
-        backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop", // Placeholder luxury retail image
-        overlayOpacity: 0.6,
+        slides: [
+            {
+                id: "default-slide-1",
+                title: "Experience International Retail",
+                subtitle: "Premium groceries, fashion, and lifestyle products available at our flagship store.",
+                ctaText: "View Collection",
+                ctaLink: "/products",
+                backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop",
+                overlayOpacity: 0.6,
+            }
+        ]
     },
     promotions: {
         enabled: true,
@@ -125,6 +136,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         showTestimonials: true,
     },
     footer: {
+        logoUrl: "",
         tagline: "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion.",
         socialLinks: {
             facebook: "#",

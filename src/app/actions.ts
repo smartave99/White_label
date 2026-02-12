@@ -5,6 +5,7 @@
 import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { getSearchCache, CacheKeys } from "@/lib/search-cache";
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 
 // ==================== OFFERS ====================
 
@@ -35,7 +36,7 @@ export async function createOffer(title: string, discount: string, description: 
     }
 }
 
-export async function getOffers(): Promise<Offer[]> {
+export const getOffers = cache(async function getOffers(): Promise<Offer[]> {
     try {
         const snapshot = await getAdminDb().collection("offers").orderBy("createdAt", "desc").get();
         return snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
@@ -47,7 +48,7 @@ export async function getOffers(): Promise<Offer[]> {
         console.error("Error fetching offers:", error);
         return [];
     }
-}
+});
 
 export async function deleteOffer(id: string) {
     try {
@@ -202,7 +203,7 @@ export interface AboutPageContent {
 }
 
 // Get site content by section
-export async function getSiteContent<T>(section: string): Promise<T | null> {
+export const getSiteContent = cache(async function getSiteContent<T>(section: string): Promise<T | null> {
     try {
         const doc = await getAdminDb().collection("siteContent").doc(section).get();
         if (doc.exists) {
@@ -219,7 +220,7 @@ export async function getSiteContent<T>(section: string): Promise<T | null> {
         console.error(`Error fetching ${section} content:`, error);
         return null;
     }
-}
+});
 
 // Update site content by section
 export async function updateSiteContent(section: string, data: Record<string, unknown>) {
@@ -238,7 +239,7 @@ export async function updateSiteContent(section: string, data: Record<string, un
 }
 
 // Get all departments
-export async function getDepartments(): Promise<DepartmentContent[]> {
+export const getDepartments = cache(async function getDepartments(): Promise<DepartmentContent[]> {
     try {
         const doc = await getAdminDb().collection("siteContent").doc("departments").get();
         if (doc.exists) {
@@ -249,7 +250,7 @@ export async function getDepartments(): Promise<DepartmentContent[]> {
         console.error("Error fetching departments:", error);
         return [];
     }
-}
+});
 
 // Update departments
 export async function updateDepartments(departments: DepartmentContent[]) {
@@ -380,7 +381,7 @@ export interface Category {
     createdAt: Date;
 }
 
-export async function getCategories(): Promise<Category[]> {
+export const getCategories = cache(async function getCategories(): Promise<Category[]> {
     const cache = getSearchCache();
     const cacheKey = CacheKeys.categories();
 
@@ -405,7 +406,7 @@ export async function getCategories(): Promise<Category[]> {
         console.error("Error fetching categories:", error);
         return [];
     }
-}
+});
 
 export async function createCategory(name: string, parentId: string | null = null) {
     try {
@@ -488,7 +489,7 @@ export interface Product {
     updatedAt?: Date;
 }
 
-export async function getProducts(
+export const getProducts = cache(async function getProducts(
     categoryId?: string,
     available?: boolean,
     limitCount: number = 200, // Increased default for better initial visibility
@@ -546,7 +547,7 @@ export async function getProducts(
         console.error("Error fetching products:", error);
         return [];
     }
-}
+});
 
 /**
  * Search products by text query with in-memory filtering
@@ -591,7 +592,7 @@ export async function searchProducts(
     return filtered;
 }
 
-export async function getProduct(id: string): Promise<Product | null> {
+export const getProduct = cache(async function getProduct(id: string): Promise<Product | null> {
     try {
         const doc = await getAdminDb().collection("products").doc(id).get();
         if (doc.exists) {
@@ -608,7 +609,7 @@ export async function getProduct(id: string): Promise<Product | null> {
         console.error("Error fetching product:", error);
         return null;
     }
-}
+});
 
 // ==================== REVIEWS ====================
 
@@ -751,7 +752,7 @@ export async function addReview(productId: string, userId: string, userName: str
     }
 }
 
-export async function getReviews(productId: string): Promise<Review[]> {
+export const getReviews = cache(async function getReviews(productId: string): Promise<Review[]> {
     try {
         console.log(`[getReviews] Fetching reviews for product: ${productId}`);
         const db = getAdminDb();
@@ -794,7 +795,7 @@ export async function getReviews(productId: string): Promise<Review[]> {
         console.error("[getReviews] Fatal error fetching reviews:", error);
         return [];
     }
-}
+});
 
 export async function deleteReview(reviewId: string, productId: string, rating: number) {
     try {

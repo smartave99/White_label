@@ -1,94 +1,125 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
-import { HeroContent } from "@/app/actions";
+import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSiteConfig } from "@/context/SiteConfigContext";
+import { HeroConfig } from "@/types/site-config";
 
-const DEFAULT_HERO = {
-    title: "Experience the Future of Retail",
-    subtitle: "Curated premium essentials available at our exclusive location.",
-    ctaText: "View Collection",
-    ctaLink: "/products",
-    backgroundImageUrl: "https://images.unsplash.com/photo-1481437156560-3205f6a55735?q=80&w=2695&auto=format&fit=crop",
-    overlayOpacity: 0.5,
-};
-
-export default function Hero({ content }: { content?: HeroContent }) {
+export default function Hero({ content }: { content?: any }) {
     const { config } = useSiteConfig();
+    const [currentSlide, setCurrentSlide] = useState(0);
 
-    // Mapping content (Action Type) to Config (Context Type)
-    // Priority: Content (Specific) > SiteConfig (Global) > Default
-    const title = content?.title || config?.hero?.title || DEFAULT_HERO.title;
-    const subtitle = content?.subtitle || config?.hero?.subtitle || DEFAULT_HERO.subtitle;
+    // Use unified config from context if available, fallback to provided content for safety
+    // For this version, we prioritize the new multi-slide config
+    const heroConfig = config?.hero as HeroConfig;
+    const slides = heroConfig?.slides || [];
 
-    // Handle type mismatch between HeroContent (ctaPrimary) and SiteConfig (ctaText)
-    const ctaText = content?.ctaPrimary || config?.hero?.ctaText || DEFAULT_HERO.ctaText;
-    const ctaLink = config?.hero?.ctaLink || DEFAULT_HERO.ctaLink;
+    // Auto-advance slides
+    useEffect(() => {
+        if (slides.length <= 1) return;
+        const timer = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }, 8000);
+        return () => clearInterval(timer);
+    }, [slides.length]);
 
-    // Handle type mismatch for background image
-    const bgImage = content?.backgroundImage || config?.hero?.backgroundImageUrl || DEFAULT_HERO.backgroundImageUrl;
-    const overlayOpacity = config?.hero?.overlayOpacity ?? DEFAULT_HERO.overlayOpacity;
+    if (!slides || slides.length === 0) return null;
 
-    const learnMoreLink = content?.learnMoreLink || config?.hero?.learnMoreLink || "/offers";
+    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+
+    const slide = slides[currentSlide];
 
     return (
         <section className="relative h-[85vh] min-h-[600px] flex items-center overflow-hidden bg-brand-dark">
-            {/* Background Image with optimized loading */}
-            <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] animate-slow-zoom"
-                style={{ backgroundImage: `url(${bgImage})` }}
-            />
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={slide.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1 }}
+                    className="absolute inset-0"
+                >
+                    {/* Background Image */}
+                    <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] animate-slow-zoom"
+                        style={{ backgroundImage: `url(${slide.backgroundImageUrl})` }}
+                    />
 
-            {/* Modern Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent" />
-            <div
-                className="absolute inset-0 bg-brand-blue/10 mix-blend-overlay"
-                style={{ opacity: overlayOpacity }}
-            />
+                    {/* Modern Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent" />
+                    <div
+                        className="absolute inset-0 bg-brand-blue/10 mix-blend-overlay"
+                        style={{ opacity: slide.overlayOpacity }}
+                    />
 
-            <div className="container mx-auto px-4 md:px-6 relative z-10 pt-20">
-                <div className="max-w-3xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-brand-lime text-xs font-medium tracking-wide mb-6 uppercase">
-                            <Sparkles className="w-3 h-3" />
-                            <span>Smart Avenue 99</span>
+                    <div className="container mx-auto px-4 md:px-6 relative z-10 h-full flex items-center">
+                        <div className="max-w-3xl pt-20">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                            >
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-brand-lime text-xs font-medium tracking-wide mb-6 uppercase">
+                                    <Sparkles className="w-3 h-3" />
+                                    <span>Smart Avenue 99</span>
+                                </div>
+
+                                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+                                    {slide.title.split(" ").map((word, i) => (
+                                        <span key={i} className={i === 1 ? "text-gradient block" : "block"}>
+                                            {word}{" "}
+                                        </span>
+                                    ))}
+                                </h1>
+
+                                <p className="text-lg md:text-2xl text-slate-300 mb-10 font-light max-w-2xl leading-relaxed">
+                                    {slide.subtitle}
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <Link href={slide.ctaLink || "/products"}>
+                                        <button className="group relative px-8 py-4 bg-brand-blue hover:bg-sky-500 text-white rounded-full font-semibold transition-all shadow-lg shadow-brand-blue/25 hover:shadow-brand-blue/40 flex items-center gap-2">
+                                            {slide.ctaText}
+                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                    </Link>
+                                    <Link href={slide.learnMoreLink || "/offers"}>
+                                        <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-medium backdrop-blur-md transition-all">
+                                            Learn More
+                                        </button>
+                                    </Link>
+                                </div>
+                            </motion.div>
                         </div>
+                    </div>
+                </motion.div>
+            </AnimatePresence>
 
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-                            {title.split(" ").map((word, i) => (
-                                <span key={i} className={i === 1 ? "text-gradient block" : "block"}>
-                                    {word}{" "}
-                                </span>
-                            ))}
-                        </h1>
-
-                        <p className="text-lg md:text-2xl text-slate-300 mb-10 font-light max-w-2xl leading-relaxed">
-                            {subtitle}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <Link href={ctaLink}>
-                                <button className="group relative px-8 py-4 bg-brand-blue hover:bg-sky-500 text-white rounded-full font-semibold transition-all shadow-lg shadow-brand-blue/25 hover:shadow-brand-blue/40 flex items-center gap-2">
-                                    {ctaText}
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </button>
-                            </Link>
-                            <Link href={learnMoreLink}>
-                                <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-medium backdrop-blur-md transition-all">
-                                    Learn More
-                                </button>
-                            </Link>
-                        </div>
-                    </motion.div>
+            {/* Slider Controls */}
+            {slides.length > 1 && (
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-6">
+                    <button onClick={prevSlide} className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors">
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <div className="flex gap-2">
+                        {slides.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentSlide(i)}
+                                className={`w-2 h-2 rounded-full transition-all ${i === currentSlide ? "bg-brand-blue w-8" : "bg-white/30"}`}
+                            />
+                        ))}
+                    </div>
+                    <button onClick={nextSlide} className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors">
+                        <ChevronRight className="w-6 h-6" />
+                    </button>
                 </div>
-            </div>
+            )}
 
             {/* Decorative Elements */}
             <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-gradient-to-t from-brand-lime/20 to-transparent blur-[120px] pointer-events-none" />

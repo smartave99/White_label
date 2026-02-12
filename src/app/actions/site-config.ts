@@ -3,6 +3,7 @@
 import { getAdminDb } from "@/lib/firebase-admin";
 import { SiteConfig, DEFAULT_SITE_CONFIG } from "@/types/site-config";
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 
 const CONFIG_COLLECTION = "site_config";
 const CONFIG_DOC_ID = "main";
@@ -11,7 +12,7 @@ const CONFIG_DOC_ID = "main";
  * Fetches the site configuration from Firestore.
  * Returns the default config if the document doesn't exist.
  */
-export async function getSiteConfig(): Promise<SiteConfig> {
+export const getSiteConfig = cache(async function getSiteConfig(): Promise<SiteConfig> {
     try {
         const adminDb = getAdminDb();
         const docRef = adminDb.collection(CONFIG_COLLECTION).doc(CONFIG_DOC_ID);
@@ -28,12 +29,28 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 
         // Deep merge helper could be useful here, but for now simple spread at top level
         // For a robust app, we should deeply merge.
+        const mergedHero = { ...DEFAULT_SITE_CONFIG.hero, ...data.hero };
+
+        // Server-side migration: ensure slides exists
+        if (!mergedHero.slides && (mergedHero as any).title) {
+            mergedHero.slides = [{
+                id: "migrated-1",
+                title: (mergedHero as any).title,
+                subtitle: (mergedHero as any).subtitle,
+                ctaText: (mergedHero as any).ctaText,
+                ctaLink: (mergedHero as any).ctaLink,
+                learnMoreLink: (mergedHero as any).learnMoreLink,
+                backgroundImageUrl: (mergedHero as any).backgroundImageUrl,
+                overlayOpacity: (mergedHero as any).overlayOpacity || 0.6,
+            }];
+        }
+
         return {
             ...DEFAULT_SITE_CONFIG,
             ...data,
             branding: { ...DEFAULT_SITE_CONFIG.branding, ...data.branding },
             theme: { ...DEFAULT_SITE_CONFIG.theme, ...data.theme },
-            hero: { ...DEFAULT_SITE_CONFIG.hero, ...data.hero },
+            hero: mergedHero,
             promotions: { ...DEFAULT_SITE_CONFIG.promotions, ...data.promotions },
             footer: { ...DEFAULT_SITE_CONFIG.footer, ...data.footer },
             sections: { ...DEFAULT_SITE_CONFIG.sections, ...data.sections },
@@ -43,7 +60,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
         console.error("Error fetching site config:", error);
         return DEFAULT_SITE_CONFIG;
     }
-}
+});
 
 /**
  * Updates the site configuration in Firestore.

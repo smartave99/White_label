@@ -22,7 +22,7 @@ export default function Footer() {
                         <Link href="/" className="block">
                             <div className="relative w-48 h-12">
                                 <Image
-                                    src="/logo.png"
+                                    src={footer.logoUrl || branding.logoUrl || "/logo.png"}
                                     alt={branding.siteName}
                                     fill
                                     className="object-contain brightness-0 invert"

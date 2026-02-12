@@ -14,9 +14,10 @@ import {
     Facebook,
     Instagram,
     Twitter,
-    Link as LinkIcon
+    Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function FooterEditor() {
     const { user, permissions, role, loading: authLoading } = useAuth();
@@ -134,7 +135,7 @@ export default function FooterEditor() {
                     </Link>
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-gray-800">Footer Settings</h1>
-                        <p className="text-gray-500">Manage footer text, social links, and navigation</p>
+                        <p className="text-gray-500">Manage footer logo, text, social links, and navigation</p>
                     </div>
                 </div>
 
@@ -144,6 +145,62 @@ export default function FooterEditor() {
                     </div>
                 ) : (
                     <form onSubmit={handleSave} className="space-y-6">
+                        {/* Logo Management */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2">
+                                <ImageIcon className="w-5 h-5 text-amber-500" />
+                                Footer Logo
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Logo</label>
+                                    <div className="mb-2">
+                                        <ImageUpload
+                                            folder="branding/footer-logo"
+                                            multiple={false}
+                                            currentImages={config.footer.logoUrl ? [config.footer.logoUrl] : []}
+                                            onUpload={(files) => files[0] && setConfig({
+                                                ...config,
+                                                footer: { ...config.footer, logoUrl: files[0].url }
+                                            })}
+                                            onRemove={() => setConfig({
+                                                ...config,
+                                                footer: { ...config.footer, logoUrl: "" }
+                                            })}
+                                        />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={config.footer.logoUrl || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            footer: { ...config.footer, logoUrl: e.target.value }
+                                        })}
+                                        placeholder="Or enter URL manually..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        This logo appears in the dark footer section. Will fallback to the main branding logo if not set.
+                                    </p>
+                                </div>
+                                <div className="bg-brand-dark rounded-lg p-8 flex items-center justify-center border border-gray-200">
+                                    <div className="relative w-48 h-12">
+                                        {config.footer.logoUrl || config.branding.logoUrl ? (
+                                            <img
+                                                src={config.footer.logoUrl || config.branding.logoUrl}
+                                                alt="Footer Logo Preview"
+                                                className="object-contain brightness-0 invert w-full h-full"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full border-2 border-dashed border-white/20 flex items-center justify-center text-white/40 text-xs">
+                                                No Logo Selected
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Tagline & Social */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <h2 className="text-lg font-semibold mb-4 text-gray-800">General Information</h2>

@@ -9,15 +9,20 @@ import { getSiteConfig } from "@/app/actions/site-config";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const featuresContent = (await getSiteContent<FeaturesContent>("features")) || undefined;
-  const ctaContent = (await getSiteContent<CTAContent>("cta")) || undefined;
-  const highlightsContent = (await getSiteContent<HighlightsContent>("highlights")) || undefined;
-  const heroContent = (await getSiteContent<HeroContent>("hero")) || undefined;
-  const config = await getSiteConfig();
+  const [featuresRes, ctaRes, highlightsRes, config] = await Promise.all([
+    getSiteContent<FeaturesContent>("features"),
+    getSiteContent<CTAContent>("cta"),
+    getSiteContent<HighlightsContent>("highlights"),
+    getSiteConfig(),
+  ]);
+
+  const featuresContent = featuresRes || undefined;
+  const ctaContent = ctaRes || undefined;
+  const highlightsContent = highlightsRes || undefined;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
-      <Hero content={heroContent} />
+      <Hero />
 
       <Promotions config={config.promotions} />
 

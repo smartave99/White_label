@@ -79,9 +79,10 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: "/favicon.ico?v=2",
+    apple: "/apple-icon.png?v=2",
   },
+  themeColor: "#0284c7", // brand-blue
 };
 
 import { getSiteConfig } from "@/app/actions/site-config";

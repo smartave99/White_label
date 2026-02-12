@@ -4,7 +4,7 @@
 import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 
 export interface UploadedFile {
@@ -32,6 +32,7 @@ export default function ImageUpload({
     onRemove
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,14 +52,15 @@ export default function ImageUpload({
 
         setError(null);
         setUploading(true);
+        setProgress(0);
         const newFiles: UploadedFile[] = [];
 
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    throw new Error(`File ${file.name} is too large (max 5MB)`);
+                // Check file size (max 10MB) - increased from 5MB
+                if (file.size > 10 * 1024 * 1024) {
+                    throw new Error(`File ${file.name} is too large (max 10MB)`);
                 }
 
                 // Check file type
@@ -71,9 +73,25 @@ export default function ImageUpload({
                 const fullPath = `${folder}/${timestamp}_${safeName}`;
                 const storageRef = ref(storage, fullPath);
 
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                newFiles.push({ url, path: fullPath });
+                // Use resumable upload for better feedback
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                await new Promise<void>((resolve, reject) => {
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            setProgress(Math.round(p));
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        async () => {
+                            const url = await getDownloadURL(uploadTask.snapshot.ref);
+                            newFiles.push({ url, path: fullPath });
+                            resolve();
+                        }
+                    );
+                });
             }
 
             onUpload(newFiles);
@@ -87,6 +105,7 @@ export default function ImageUpload({
             setError(err instanceof Error ? err.message : "Failed to upload image");
         } finally {
             setUploading(false);
+            setProgress(0);
         }
     };
 
@@ -100,7 +119,10 @@ export default function ImageUpload({
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
                     {uploading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-brand-gold" />
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                            <span className="text-sm font-medium">{progress}%</span>
+                        </div>
                     ) : (
                         <Upload className="w-4 h-4" />
                     )}
