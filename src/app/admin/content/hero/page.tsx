@@ -168,7 +168,7 @@ export default function HeroEditor() {
                                 </div>
 
                                 <div className="md:col-span-2 mt-4">
-                                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Secondary Button ("Learn More")</h4>
+                                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Secondary Button (&quot;Learn More&quot;)</h4>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>

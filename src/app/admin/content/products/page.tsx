@@ -51,6 +51,7 @@ export default function ProductsManager() {
     const [showForm, setShowForm] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(true);
 
 
     // ... filters state
@@ -71,7 +72,6 @@ export default function ProductsManager() {
             return nameMatch || descMatch || tagMatch;
         });
     }, [products, searchQuery]);
-    const [lastDocId, setLastDocId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<{
         name: string;

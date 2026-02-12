@@ -168,6 +168,7 @@ export interface OffersPageContent {
     heroTitle: string;
     heroSubtitle: string;
     heroImage: string;
+    catalogueUrl?: string;
 }
 
 export interface DepartmentsPageContent {
@@ -593,7 +594,6 @@ export async function getProduct(id: string): Promise<Product | null> {
 // ==================== REVIEWS ====================
 
 // Add new product
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createProduct(data: Record<string, unknown>) {
     try {
         const docRef = await getAdminDb().collection("products").add({
@@ -616,7 +616,6 @@ export async function createProduct(data: Record<string, unknown>) {
 }
 
 // Update product
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateProduct(id: string, data: Record<string, unknown>) {
     try {
         await getAdminDb().collection("products").doc(id).update({
