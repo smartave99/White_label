@@ -34,6 +34,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
             branding: { ...DEFAULT_SITE_CONFIG.branding, ...data.branding },
             theme: { ...DEFAULT_SITE_CONFIG.theme, ...data.theme },
             hero: { ...DEFAULT_SITE_CONFIG.hero, ...data.hero },
+            promotions: { ...DEFAULT_SITE_CONFIG.promotions, ...data.promotions },
             sections: { ...DEFAULT_SITE_CONFIG.sections, ...data.sections },
             contact: { ...DEFAULT_SITE_CONFIG.contact, ...data.contact },
         };

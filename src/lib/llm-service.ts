@@ -443,16 +443,17 @@ Current Knowledge:
 - Specs: ${intent.requirements.length > 0 || intent.productRequestData?.specifications?.length ? "Known" : "Unknown"}
 
 Decision Logic:
-1. If the user has ALREADY provided a budget OR specific details in the history/query, we have enough to submit.
-2. If the user has explicitly said "requests it" or "order it", submit.
-3. If this is the FIRST time they mentioned it and gave NO details (just "do you have gucci bags?"), we should ASK for details first.
-4. If they just answered a question about details (e.g. "My budget is 5k"), submit.
+1. A request implies we need to KNOW what they want.
+2. If the user has ALREADY provided a budget OR specific details in the history/query, we have enough to submit.
+3. If the user has explicitly said "requests it", "order it", "buy it", or "get it", submit (even if budget is implied or will be discussed later).
+4. If this is the FIRST time they mentioned it and gave NO details (just "do you have gucci bags?"), we should ASK for details first.
+5. If they just answered a question about details (e.g. "My budget is 5k"), submit.
 
 Output a JSON object:
 {
   "action": "request" (if we have enough to log it) OR "ask_details" (if we should ask for budget/specs first),
   "response": "The text response to the user. If requesting, say 'I've noted your request for [Product] [Details]...'. If asking, say 'We don't have [Product]. What is your budget/preference so I can request it?'",
-  "requestData": { "name": "...", "category": "...", "maxBudget": number, "specifications": ["..."] } (Required if action is 'request')
+  "requestData": { "name": "...", "category": "...", "maxBudget": number | 0 (use 0 if unknown), "specifications": ["..."] } (Required if action is 'request')
 }`;
 
     const rawResponse = await callLLM(prompt, provider);

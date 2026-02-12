@@ -73,6 +73,7 @@ export async function getRecommendations(
             const decision = await handleMissingProduct(query, intentResponse, request.messages);
 
             if (decision.action === "request" && decision.requestData) {
+                console.log("[RecommendationEngine] Auto-submitting explicit product request:", decision.requestData);
                 await createProductRequest(
                     decision.requestData.name,
                     "", // description
@@ -109,6 +110,7 @@ export async function getRecommendations(
             const decision = await handleMissingProduct(query, intentResponse, request.messages);
 
             if (decision.action === "request" && decision.requestData) {
+                console.log("[RecommendationEngine] Auto-submitting product request:", decision.requestData);
                 const { createProductRequest } = await import("@/app/actions/product-requests");
                 await createProductRequest(
                     decision.requestData.name,

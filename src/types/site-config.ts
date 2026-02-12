@@ -25,10 +25,25 @@ export interface HeroConfig {
     overlayOpacity: number;
 }
 
+export interface PromotionItem {
+    id: string;
+    imageUrl: string;
+    title?: string;
+    link?: string;
+    active: boolean;
+}
+
+export interface PromotionsConfig {
+    enabled: boolean;
+    title: string;
+    items: PromotionItem[];
+}
+
 export interface SiteConfig {
     branding: BrandingConfig;
     theme: ThemeConfig;
     hero: HeroConfig;
+    promotions: PromotionsConfig;
     sections: {
         showSmartClub: boolean;
         showWeeklyOffers: boolean;
@@ -71,6 +86,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         ctaLink: "/products",
         backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop", // Placeholder luxury retail image
         overlayOpacity: 0.6,
+    },
+    promotions: {
+        enabled: true,
+        title: "Special Offers",
+        items: []
     },
     sections: {
         showSmartClub: true,

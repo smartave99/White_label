@@ -30,11 +30,13 @@ import {
     Tag,
     X,
     Filter,
-    Film
+    Film,
+    FileSpreadsheet
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import CloudinaryUpload from "@/components/CloudinaryUpload";
+import ExcelImportModal from "@/components/admin/ExcelImportModal";
 
 export default function ProductsManager() {
     const { user, loading: authLoading } = useAuth();
@@ -45,6 +47,7 @@ export default function ProductsManager() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
 
@@ -262,6 +265,13 @@ export default function ProductsManager() {
                     >
                         Manage Categories
                     </Link>
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    >
+                        <FileSpreadsheet className="w-5 h-5" />
+                        Import Excel
+                    </button>
                     <button
                         onClick={() => { resetForm(); setShowForm(!showForm); }}
                         className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
@@ -653,6 +663,14 @@ export default function ProductsManager() {
                     )}
                 </div>
             </div>
+            <ExcelImportModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onSuccess={() => {
+                    loadData();
+                    // Optional: show toast or notification
+                }}
+            />
         </div>
     );
 }
