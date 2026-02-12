@@ -4,19 +4,9 @@ import { getAdminDb, admin } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 
 // Type definition for Excel row
+// Type definition for Excel row
 interface ProductRow {
-    Name: string;
-    Description?: string;
-    Price: number;
-    OriginalPrice?: number;
-    Discount?: number;
-    Category?: string;
-    Subcategory?: string;
-    ImageUrl?: string;
-    Available?: boolean | string;
-    Featured?: boolean | string;
-    Tags?: string;
-    OfferTitle?: string;
+    [key: string]: unknown; // Allow flexible keys for initial parsing
 }
 
 export async function importProductsFromExcel(formData: FormData) {
@@ -66,28 +56,49 @@ export async function importProductsFromExcel(formData: FormData) {
             offerMap.set(doc.id, doc.id);
         });
 
-        for (const row of rows) {
+        let totalImported = 0;
+
+        for (const rawRow of rows) {
+            // Normalize keys to lowercase
+            const row: Record<string, any> = {};
+            Object.keys(rawRow).forEach(key => {
+                row[key.trim().toLowerCase()] = rawRow[key];
+            });
+
+            // Extract fields using normalized keys
+            const Name = row['name'];
+            const Price = row['price'];
+
             // Skip invalid rows
-            if (!row.Name || !row.Price) {
-                console.warn(`Skipping row due to missing Name or Price: ${JSON.stringify(row)}`);
+            if (!Name || !Price) {
+                // Optional: log or track skipped rows
                 continue;
             }
+
+            // Other fields
+            const Category = row['category'];
+            const Subcategory = row['subcategory'];
+            const OfferTitle = row['offertitle'];
+            const Description = row['description'];
+            const OriginalPrice = row['originalprice'];
+            const ImageUrl = row['imageurl'];
+            const Available = row['available'];
+            const Featured = row['featured'];
+            const Tags = row['tags'];
 
             // Resolve Category
             let categoryId = "";
             let subcategoryId = "";
 
-            if (row.Category) {
-                const catKey = String(row.Category).trim().toLowerCase();
+            if (Category) {
+                const catKey = String(Category).trim().toLowerCase();
                 if (categoryMap.has(catKey)) {
                     categoryId = categoryMap.get(catKey)!;
-                } else {
-                    console.warn(`Category '${row.Category}' not found.`);
                 }
             }
 
-            if (row.Subcategory) {
-                const subKey = String(row.Subcategory).trim().toLowerCase();
+            if (Subcategory) {
+                const subKey = String(Subcategory).trim().toLowerCase();
                 if (categoryMap.has(subKey)) {
                     subcategoryId = categoryMap.get(subKey)!;
                 }
@@ -95,15 +106,15 @@ export async function importProductsFromExcel(formData: FormData) {
 
             // Resolve Offer
             let offerId = "";
-            if (row.OfferTitle) {
-                const offerKey = String(row.OfferTitle).trim().toLowerCase();
+            if (OfferTitle) {
+                const offerKey = String(OfferTitle).trim().toLowerCase();
                 if (offerMap.has(offerKey)) {
                     offerId = offerMap.get(offerKey)!;
                 }
             }
 
             // Resolve Product ID (Update vs Create)
-            const existingProductSnap = await db.collection("products").where("name", "==", row.Name).limit(1).get();
+            const existingProductSnap = await db.collection("products").where("name", "==", Name).limit(1).get();
 
             let productRef: admin.firestore.DocumentReference;
             const isUpdate = !existingProductSnap.empty;
@@ -115,18 +126,18 @@ export async function importProductsFromExcel(formData: FormData) {
             }
 
             const productData: Record<string, unknown> = {
-                name: row.Name,
-                description: row.Description || "",
-                price: Number(row.Price),
-                originalPrice: row.OriginalPrice ? Number(row.OriginalPrice) : null,
+                name: Name,
+                description: Description || "",
+                price: Number(Price),
+                originalPrice: OriginalPrice ? Number(OriginalPrice) : null,
                 categoryId: categoryId || "",
                 subcategoryId: subcategoryId || null,
-                imageUrl: row.ImageUrl || "",
-                images: row.ImageUrl ? [row.ImageUrl] : [],
-                available: row.Available === true || String(row.Available).toLowerCase() === "true",
-                featured: row.Featured === true || String(row.Featured).toLowerCase() === "true",
+                imageUrl: ImageUrl || "",
+                images: ImageUrl ? [ImageUrl] : [],
+                available: Available === true || String(Available).toLowerCase() === "true",
+                featured: Featured === true || String(Featured).toLowerCase() === "true",
                 offerId: offerId || null,
-                tags: row.Tags ? String(row.Tags).split(',').map(s => s.trim()) : [],
+                tags: Tags ? String(Tags).split(',').map((s: string) => s.trim()) : [],
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             };
 
@@ -144,6 +155,7 @@ export async function importProductsFromExcel(formData: FormData) {
             }
 
             operationCount++;
+            totalImported++;
 
             if (operationCount >= BATCH_SIZE) {
                 await batch.commit();
@@ -168,7 +180,11 @@ export async function importProductsFromExcel(formData: FormData) {
             // ignore cache errors
         }
 
-        return { success: true, count: rows.length };
+        if (totalImported === 0) {
+            return { success: false, error: "No valid products found. Ensure columns 'Name' and 'Price' exist." };
+        }
+
+        return { success: true, count: totalImported };
 
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : "Unknown import error" };

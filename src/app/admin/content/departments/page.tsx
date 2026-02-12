@@ -141,6 +141,16 @@ export default function DepartmentsAdminPage() {
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 resize-none"
                                             />
                                         </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Custom Link (Optional)</label>
+                                            <input
+                                                type="text"
+                                                value={dept.link || ""}
+                                                onChange={(e) => updateDepartment(dept.id, "link", e.target.value)}
+                                                placeholder="/products/category-id"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-4">
