@@ -23,7 +23,7 @@ interface ProductRow {
 */
 
 // Since XLSX is a CommonJS module, dynamic import is usually safer server side
-export async function importProductsFromExcel(formData: FormData) {
+export async function importProductsFromExcel(formData: FormData): Promise<{ success: boolean; count?: number; error?: string }> {
     if (!formData) return { success: false, error: "No data" };
     return { success: false, error: "Excel import is currently disabled. Please contact support." };
 }
