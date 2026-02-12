@@ -127,19 +127,36 @@ export async function importProductsFromExcel(formData: FormData) {
 
             const productData: Record<string, unknown> = {
                 name: Name,
-                description: Description || "",
                 price: Number(Price),
-                originalPrice: OriginalPrice ? Number(OriginalPrice) : null,
                 categoryId: categoryId || "",
-                subcategoryId: subcategoryId || null,
-                imageUrl: ImageUrl || "",
-                images: ImageUrl ? [ImageUrl] : [],
                 available: Available === true || String(Available).toLowerCase() === "true",
-                featured: Featured === true || String(Featured).toLowerCase() === "true",
-                offerId: offerId || null,
-                tags: Tags ? String(Tags).split(',').map((s: string) => s.trim()) : [],
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             };
+
+            // Only add optional fields if they exist in Excel OR if it's a new product
+            // If it's an update, we DON'T want to overwrite existing data with empty strings/nulls
+            // unless the Excel file explicitly has an empty column (which we can't easily distinguish from "missing column" without more complex logic,
+            // but for now, the user request "previous product details... got removed" implies we should safeguard existing data).
+
+            if (Description || !isUpdate) productData.description = Description || "";
+            if (OriginalPrice || !isUpdate) productData.originalPrice = OriginalPrice ? Number(OriginalPrice) : null;
+            if (subcategoryId || !isUpdate) productData.subcategoryId = subcategoryId || null;
+
+            // Image logic: 
+            // 1. If ImageUrl is provided in Excel, use it.
+            // 2. If NOT provided, and it's an update, LEAVE EXISTING IMAGES ALONE.
+            // 3. If new product, default to empty.
+            if (ImageUrl) {
+                productData.imageUrl = ImageUrl;
+                productData.images = [ImageUrl];
+            } else if (!isUpdate) {
+                productData.imageUrl = "";
+                productData.images = [];
+            }
+
+            if (Featured !== undefined || !isUpdate) productData.featured = Featured === true || String(Featured).toLowerCase() === "true";
+            if (offerId || !isUpdate) productData.offerId = offerId || null;
+            if (Tags || !isUpdate) productData.tags = Tags ? String(Tags).split(',').map((s: string) => s.trim()) : [];
 
             if (!isUpdate) {
                 productData.createdAt = admin.firestore.FieldValue.serverTimestamp();

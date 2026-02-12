@@ -134,11 +134,14 @@ export default function HeroEditor() {
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                 <LinkIcon className="w-5 h-5 text-amber-500" />
-                                Call to Action
+                                Call to Action Buttons
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2">
+                                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Primary Button</h4>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Text</label>
                                     <input
                                         type="text"
                                         value={config.hero.ctaText}
@@ -151,7 +154,7 @@ export default function HeroEditor() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Button Link</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
                                     <input
                                         type="text"
                                         value={config.hero.ctaLink}
@@ -160,6 +163,23 @@ export default function HeroEditor() {
                                             hero: { ...config.hero, ctaLink: e.target.value }
                                         })}
                                         placeholder="/products"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+
+                                <div className="md:col-span-2 mt-4">
+                                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Secondary Button ("Learn More")</h4>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                                    <input
+                                        type="text"
+                                        value={config.hero.learnMoreLink || ""}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            hero: { ...config.hero, learnMoreLink: e.target.value }
+                                        })}
+                                        placeholder="/offers"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>

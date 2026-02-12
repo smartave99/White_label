@@ -13,6 +13,7 @@ import {
     toggleProductAvailability,
     getCategories,
     getOffers,
+    searchProducts,
     Product,
     Category,
     Offer
@@ -31,7 +32,8 @@ import {
     X,
     Filter,
     Film,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Search
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -54,6 +56,9 @@ export default function ProductsManager() {
     // ... filters state
     const [filterCategory, setFilterCategory] = useState<string>("");
     const [filterAvailable, setFilterAvailable] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [hasMore, setHasMore] = useState(false);
+    const [lastDocId, setLastDocId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<{
         name: string;
@@ -110,18 +115,41 @@ export default function ProductsManager() {
         setLoading(false);
     };
 
-    const loadProducts = React.useCallback(async () => {
+    const loadProducts = React.useCallback(async (isLoadMore: boolean = false) => {
+        if (!isLoadMore) setLoading(true);
+
         const categoryFilter = filterCategory || undefined;
         const availableFilter = filterAvailable === "" ? undefined : filterAvailable === "true";
-        const data = await getProducts(categoryFilter, availableFilter);
-        setProducts(data);
-    }, [filterCategory, filterAvailable]);
+
+        let data: Product[] = [];
+
+        if (searchQuery.trim()) {
+            data = await searchProducts(searchQuery, categoryFilter);
+            setHasMore(false); // Search fetches a large batch, don't paginate for now
+        } else {
+            const limit = 50;
+            const startAfter = isLoadMore ? products[products.length - 1]?.id : undefined;
+            data = await getProducts(categoryFilter, availableFilter, limit, startAfter);
+            setHasMore(data.length === limit);
+        }
+
+        if (isLoadMore) {
+            setProducts(prev => [...prev, ...data]);
+        } else {
+            setProducts(data);
+        }
+        setLoading(false);
+    }, [filterCategory, filterAvailable, searchQuery, products]);
 
     useEffect(() => {
-        if (user && !loading) {
-            loadProducts();
+        if (user) {
+            // Debounced search or immediate filter change
+            const timer = setTimeout(() => {
+                loadProducts();
+            }, searchQuery ? 500 : 0);
+            return () => clearTimeout(timer);
         }
-    }, [user, loading, loadProducts]);
+    }, [user, loadProducts, searchQuery, filterCategory, filterAvailable]);
 
     const resetForm = () => {
         setFormData({
@@ -230,8 +258,24 @@ export default function ProductsManager() {
     };
 
     const handleToggleAvailability = async (id: string, current: boolean) => {
-        await toggleProductAvailability(id, !current);
-        await loadProducts();
+        // Optimistic update
+        setProducts(prev => prev.map(p =>
+            p.id === id ? { ...p, available: !current } : p
+        ));
+
+        // Sync with server
+        const res = await toggleProductAvailability(id, !current);
+
+        // Revert if failed
+        if (!res.success) {
+            alert("Failed to update availability");
+            setProducts(prev => prev.map(p =>
+                p.id === id ? { ...p, available: current } : p
+            ));
+        } else {
+            // Optional: Reload to ensure consistency, but not strictly necessary if optimistic worked
+            // await loadProducts(); 
+        }
     };
 
     const mainCategories = categories.filter(c => !c.parentId);
@@ -283,40 +327,52 @@ export default function ProductsManager() {
 
                 {/* Filters */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
-                    <div className="flex items-center gap-4 flex-wrap">
-                        <Filter className="w-5 h-5 text-gray-400" />
-                        <select
-                            value={filterCategory}
-                            onChange={(e) => setFilterCategory(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        >
-                            <option value="">All Categories</option>
-                            {mainCategories.map(cat => (
-                                <optgroup key={cat.id} label={cat.name}>
-                                    <option value={cat.id}>{cat.name}</option>
-                                    {getSubcategories(cat.id).map(sub => (
-                                        <option key={sub.id} value={sub.id}>  └ {sub.name}</option>
-                                    ))}
-                                </optgroup>
-                            ))}
-                        </select>
-                        <select
-                            value={filterAvailable}
-                            onChange={(e) => setFilterAvailable(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        >
-                            <option value="">All Status</option>
-                            <option value="true">Available</option>
-                            <option value="false">Unavailable</option>
-                        </select>
-                        {(filterCategory || filterAvailable) && (
-                            <button
-                                onClick={() => { setFilterCategory(""); setFilterAvailable(""); }}
-                                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                        <div className="flex-1 relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search products by name or tag..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            />
+                        </div>
+                        <div className="flex items-center gap-4 flex-wrap w-full md:w-auto">
+                            <Filter className="w-5 h-5 text-gray-400" />
+                            <select
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                             >
-                                Clear Filters
-                            </button>
-                        )}
+                                <option value="">All Categories</option>
+                                {mainCategories.map(cat => (
+                                    <optgroup key={cat.id} label={cat.name}>
+                                        <option value={cat.id}>{cat.name}</option>
+                                        {getSubcategories(cat.id).map(sub => (
+                                            <option key={sub.id} value={sub.id}>  └ {sub.name}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+                            </select>
+                            <select
+                                value={filterAvailable}
+                                onChange={(e) => setFilterAvailable(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            >
+                                <option value="">All Status</option>
+                                <option value="true">Available</option>
+                                <option value="false">Unavailable</option>
+                            </select>
+                            {(filterCategory || filterAvailable || searchQuery) && (
+                                <button
+                                    onClick={() => { setFilterCategory(""); setFilterAvailable(""); setSearchQuery(""); }}
+                                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 

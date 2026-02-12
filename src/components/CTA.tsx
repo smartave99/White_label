@@ -30,7 +30,7 @@ export default function CTA({ content }: { content?: CTAContent }) {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
-                        href="/products"
+                        href={finalContent.ctaLink || "/products"}
                         className="px-8 py-4 bg-brand-lime hover:bg-lime-400 text-brand-dark font-bold rounded-full transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(132,204,22,0.4)]"
                     >
                         {finalContent.ctaPrimary} <ArrowRight className="w-5 h-5" />

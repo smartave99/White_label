@@ -21,6 +21,7 @@ export interface HeroConfig {
     subtitle: string;
     ctaText: string;
     ctaLink: string;
+    learnMoreLink?: string;
     backgroundImageUrl: string;
     overlayOpacity: number;
 }

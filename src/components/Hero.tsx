@@ -31,6 +31,8 @@ export default function Hero({ content }: { content?: HeroContent }) {
     const bgImage = content?.backgroundImage || config?.hero?.backgroundImageUrl || DEFAULT_HERO.backgroundImageUrl;
     const overlayOpacity = config?.hero?.overlayOpacity ?? DEFAULT_HERO.overlayOpacity;
 
+    const learnMoreLink = content?.learnMoreLink || config?.hero?.learnMoreLink || "/offers";
+
     return (
         <section className="relative h-[85vh] min-h-[600px] flex items-center overflow-hidden bg-brand-dark">
             {/* Background Image with optimized loading */}
@@ -78,7 +80,7 @@ export default function Hero({ content }: { content?: HeroContent }) {
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </Link>
-                            <Link href="/offers">
+                            <Link href={learnMoreLink}>
                                 <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-medium backdrop-blur-md transition-all">
                                     Learn More
                                 </button>

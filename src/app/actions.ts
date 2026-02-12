@@ -473,7 +473,7 @@ export interface Product {
 export async function getProducts(
     categoryId?: string,
     available?: boolean,
-    limitCount: number = 50,
+    limitCount: number = 200, // Increased default for better initial visibility
     startAfterId?: string
 ): Promise<Product[]> {
     const cache = getSearchCache();
@@ -539,8 +539,8 @@ export async function searchProducts(
     categoryId?: string,
     subcategoryId?: string
 ): Promise<Product[]> {
-    // Get all products (uses cache) and filter available ones in-memory
-    const allProducts = await getProducts();
+    // For admin/global search, we want to fetch a larger batch to find items
+    const allProducts = await getProducts(undefined, undefined, 1000);
 
     const searchLower = searchQuery.toLowerCase().trim();
 
