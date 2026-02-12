@@ -3,7 +3,7 @@ import Highlights from "@/components/Highlights";
 import Features from "@/components/Features";
 import CTA from "@/components/CTA";
 import Promotions from "@/components/Promotions";
-import { getSiteContent, FeaturesContent, CTAContent, HighlightsContent, HeroContent } from "@/app/actions";
+import { getSiteContent, FeaturesContent, CTAContent, HighlightsContent } from "@/app/actions";
 import { getSiteConfig } from "@/app/actions/site-config";
 
 export const dynamic = "force-dynamic";

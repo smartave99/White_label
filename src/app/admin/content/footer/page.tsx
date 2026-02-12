@@ -17,6 +17,7 @@ import {
     Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import ImageUpload from "@/components/ImageUpload";
 
 export default function FooterEditor() {
@@ -186,10 +187,11 @@ export default function FooterEditor() {
                                 <div className="bg-brand-dark rounded-lg p-8 flex items-center justify-center border border-gray-200">
                                     <div className="relative w-48 h-12">
                                         {config.footer.logoUrl || config.branding.logoUrl ? (
-                                            <img
-                                                src={config.footer.logoUrl || config.branding.logoUrl}
+                                            <Image
+                                                src={config.footer.logoUrl || config.branding.logoUrl || ""}
                                                 alt="Footer Logo Preview"
-                                                className="object-contain brightness-0 invert w-full h-full"
+                                                fill
+                                                className="object-contain brightness-0 invert"
                                             />
                                         ) : (
                                             <div className="w-full h-full border-2 border-dashed border-white/20 flex items-center justify-center text-white/40 text-xs">

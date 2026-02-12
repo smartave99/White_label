@@ -27,8 +27,18 @@ export interface HeroSlide {
     overlayOpacity: number;
 }
 
-export interface HeroConfig {
+export interface HeroConfig extends DeprecatedHeroConfig {
     slides: HeroSlide[];
+}
+
+export interface DeprecatedHeroConfig {
+    title?: string;
+    subtitle?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    learnMoreLink?: string;
+    backgroundImageUrl?: string;
+    overlayOpacity?: number;
 }
 
 export interface PromotionItem {

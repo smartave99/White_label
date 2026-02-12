@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { HeroConfig } from "@/types/site-config";
 
-export default function Hero({ content }: { content?: any }) {
+export default function Hero() {
     const { config } = useSiteConfig();
     const [currentSlide, setCurrentSlide] = useState(0);
 

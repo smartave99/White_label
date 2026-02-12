@@ -32,16 +32,16 @@ export const getSiteConfig = cache(async function getSiteConfig(): Promise<SiteC
         const mergedHero = { ...DEFAULT_SITE_CONFIG.hero, ...data.hero };
 
         // Server-side migration: ensure slides exists
-        if (!mergedHero.slides && (mergedHero as any).title) {
+        if (!mergedHero.slides && mergedHero.title) {
             mergedHero.slides = [{
                 id: "migrated-1",
-                title: (mergedHero as any).title,
-                subtitle: (mergedHero as any).subtitle,
-                ctaText: (mergedHero as any).ctaText,
-                ctaLink: (mergedHero as any).ctaLink,
-                learnMoreLink: (mergedHero as any).learnMoreLink,
-                backgroundImageUrl: (mergedHero as any).backgroundImageUrl,
-                overlayOpacity: (mergedHero as any).overlayOpacity || 0.6,
+                title: mergedHero.title,
+                subtitle: mergedHero.subtitle || "",
+                ctaText: mergedHero.ctaText || "Learn More",
+                ctaLink: mergedHero.ctaLink || "/products",
+                learnMoreLink: mergedHero.learnMoreLink,
+                backgroundImageUrl: mergedHero.backgroundImageUrl || "",
+                overlayOpacity: mergedHero.overlayOpacity || 0.6,
             }];
         }
 

@@ -53,16 +53,16 @@ export default function HeroEditor() {
         try {
             const data = await getSiteConfig();
             // Migration: if hero doesn't have slides but has old format, convert it
-            if (!data.hero.slides && (data.hero as any).title) {
+            if (!data.hero.slides && data.hero.title) {
                 data.hero.slides = [{
                     id: generateId(),
-                    title: (data.hero as any).title,
-                    subtitle: (data.hero as any).subtitle,
-                    ctaText: (data.hero as any).ctaText,
-                    ctaLink: (data.hero as any).ctaLink,
-                    learnMoreLink: (data.hero as any).learnMoreLink,
-                    backgroundImageUrl: (data.hero as any).backgroundImageUrl,
-                    overlayOpacity: (data.hero as any).overlayOpacity || 0.6,
+                    title: data.hero.title,
+                    subtitle: data.hero.subtitle || "",
+                    ctaText: data.hero.ctaText || "Learn More",
+                    ctaLink: data.hero.ctaLink || "/products",
+                    learnMoreLink: data.hero.learnMoreLink,
+                    backgroundImageUrl: data.hero.backgroundImageUrl || "",
+                    overlayOpacity: data.hero.overlayOpacity || 0.6,
                 }];
             }
             setConfig(data);
