@@ -193,6 +193,7 @@ export default function FooterEditor() {
                                                 alt="Footer Logo Preview"
                                                 fill
                                                 className="object-contain brightness-0 invert"
+                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full border-2 border-dashed border-white/20 flex items-center justify-center text-white/40 text-xs">
