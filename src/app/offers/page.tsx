@@ -1,14 +1,41 @@
 import { getOffers, getSiteContent, OffersPageContent } from "@/app/actions";
 import OffersList from "@/components/OffersList";
 import Image from "next/image";
+import OfferFilterSidebar from "@/components/OfferFilterSidebar";
 
 export const dynamic = "force-dynamic";
 
-export default async function OffersPage() {
-    const [offers, pageContent] = await Promise.all([
+export default async function OffersPage({
+    searchParams
+}: {
+    searchParams: Promise<{ search?: string; sort?: string }>
+}) {
+    const params = await searchParams;
+
+    const [allOffers, pageContent] = await Promise.all([
         getOffers(),
         getSiteContent<OffersPageContent>("offers-page")
     ]);
+
+    // --- Filtering Logic ---
+    let filteredOffers = allOffers;
+
+    // 1. Search
+    if (params.search) {
+        const searchLower = params.search.toLowerCase();
+        filteredOffers = filteredOffers.filter(o =>
+            o.title.toLowerCase().includes(searchLower) ||
+            (o.description && o.description.toLowerCase().includes(searchLower))
+        );
+    }
+
+    // 2. Sort
+    const sortOption = params.sort || "newest";
+    filteredOffers.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return sortOption === "oldest" ? dateA - dateB : dateB - dateA;
+    });
 
     const heroTitle = pageContent?.heroTitle || "Weekly Offers";
     const heroSubtitle = pageContent?.heroSubtitle || "Curated deals and premium privileges for our valued members.";
@@ -48,12 +75,20 @@ export default async function OffersPage() {
             </div>
 
             <div className="container mx-auto px-4 md:px-6 py-16 -mt-10 relative z-20">
-                <OffersList
-                    offers={offers}
-                    catalogueUrl={pageContent?.catalogueUrl}
-                    catalogueTitle={pageContent?.catalogueTitle}
-                    catalogueSubtitle={pageContent?.catalogueSubtitle}
-                />
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Sidebar */}
+                    <OfferFilterSidebar />
+
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        <OffersList
+                            offers={filteredOffers}
+                            catalogueUrl={pageContent?.catalogueUrl}
+                            catalogueTitle={pageContent?.catalogueTitle}
+                            catalogueSubtitle={pageContent?.catalogueSubtitle}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );
