@@ -120,7 +120,7 @@ export default function AssistantChat() {
             const data: RecommendationResponse = await response.json();
 
             // Format the summary - simple markdown bold parsing
-            const formattedSummary = data.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            const formattedSummary = (data.summary || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),

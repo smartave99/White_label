@@ -308,13 +308,13 @@ export default function AppearancePage() {
                             Section Visibility
                         </h2>
                         <div className="space-y-3">
-                            {Object.entries(config.sections).map(([key, value]) => (
+                            {config.sections && Object.entries(config.sections).map(([key, value]) => (
                                 <label key={key} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <span className="text-gray-700 font-medium capitalize">{key.replace(/show/, '').replace(/([A-Z])/g, ' $1').trim()}</span>
+                                    <span className="text-gray-700 font-medium capitalize">{(key || '').replace(/show/, '').replace(/([A-Z])/g, ' $1').trim()}</span>
                                     <div className={`w-12 h-6 rounded-full p-1 transition-colors ${value ? 'bg-green-500' : 'bg-gray-300'}`}>
                                         <input
                                             type="checkbox"
-                                            checked={value}
+                                            checked={!!value}
                                             onChange={(e) => setConfig({
                                                 ...config,
                                                 sections: { ...config.sections, [key]: e.target.checked }
