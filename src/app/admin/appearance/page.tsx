@@ -8,8 +8,7 @@ import { SiteConfig } from "@/types/site-config";
 import { ArrowLeft, Save, Loader2, Upload } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { uploadFile } from "@/app/actions/upload";
 
 export default function AppearancePage() {
     const { user, loading: authLoading } = useAuth();
@@ -56,20 +55,26 @@ export default function AppearancePage() {
     const handleImageUpload = async (file: File, path: string, field: "hero.backgroundImageUrl" | "branding.logoUrl") => {
         setUploading(true);
         try {
-            const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("folder", path);
 
-            setConfig(prev => {
-                if (!prev) return null;
-                const newConfig = { ...prev };
-                if (field === "hero.backgroundImageUrl") {
-                    newConfig.hero.backgroundImageUrl = url;
-                } else if (field === "branding.logoUrl") {
-                    newConfig.branding.logoUrl = url;
-                }
-                return newConfig;
-            });
+            const result = await uploadFile(formData);
+
+            if (result.success && result.url) {
+                setConfig(prev => {
+                    if (!prev) return null;
+                    const newConfig = { ...prev };
+                    if (field === "hero.backgroundImageUrl") {
+                        newConfig.hero.backgroundImageUrl = result.url;
+                    } else if (field === "branding.logoUrl") {
+                        newConfig.branding.logoUrl = result.url;
+                    }
+                    return newConfig;
+                });
+            } else {
+                throw new Error(result.error || "Upload failed");
+            }
         } catch (error) {
             console.error("Error uploading image:", error);
             alert("Failed to upload image.");

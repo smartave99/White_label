@@ -1,10 +1,8 @@
-
 "use client";
 
 import { useState, useRef } from "react";
 import { Upload, X, Loader2, FileText } from "lucide-react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { uploadFile } from "@/app/actions/upload";
 
 export interface UploadedFile {
     url: string;
@@ -57,19 +55,22 @@ export default function FileUpload({
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 10MB for PDFs)
+                // Check file size (max 10MB)
                 if (file.size > 10 * 1024 * 1024) {
                     throw new Error(`File ${file.name} is too large (max 10MB)`);
                 }
 
-                const timestamp = Date.now();
-                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-                const fullPath = `${folder}/${timestamp}_${safeName}`;
-                const storageRef = ref(storage, fullPath);
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("folder", folder);
 
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                newFiles.push({ url, path: fullPath });
+                const result = await uploadFile(formData);
+
+                if (result.success && result.url) {
+                    newFiles.push({ url: result.url, path: result.path || "" });
+                } else {
+                    throw new Error(result.error || "Failed to upload file");
+                }
             }
 
             onUpload(newFiles);
