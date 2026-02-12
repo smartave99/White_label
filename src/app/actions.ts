@@ -700,6 +700,42 @@ export async function deleteProducts(ids: string[]) {
     }
 }
 
+// Bulk update products (availability, featured, category, etc.)
+export async function bulkUpdateProducts(ids: string[], data: Record<string, unknown>) {
+    try {
+        const db = getAdminDb();
+        const collection = db.collection("products");
+
+        // Firestore batch limit is 500; chunk if needed
+        const chunks = [];
+        for (let i = 0; i < ids.length; i += 500) {
+            chunks.push(ids.slice(i, i + 500));
+        }
+
+        for (const chunk of chunks) {
+            const batch = db.batch();
+            chunk.forEach(id => {
+                batch.update(collection.doc(id), {
+                    ...data,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            });
+            await batch.commit();
+        }
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+
+        return { success: true, count: ids.length };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    } finally {
+        getSearchCache().clearPrefix("products");
+        getSearchCache().clearPrefix("query");
+    }
+}
+
 // Toggle product availability
 export async function toggleProductAvailability(id: string, available: boolean) {
     try {

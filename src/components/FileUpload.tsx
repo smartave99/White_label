@@ -55,16 +55,22 @@ export default function FileUpload({
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    throw new Error(`File ${file.name} is too large (max 10MB)`);
+                // Check file size (max 50MB)
+                if (file.size > 50 * 1024 * 1024) {
+                    throw new Error(`File ${file.name} is too large (max 50MB)`);
                 }
 
                 const formData = new FormData();
                 formData.append("file", file);
                 formData.append("folder", folder);
 
-                const result = await uploadFile(formData);
+                // Upload with 30-second timeout to prevent infinite hang
+                const result = await Promise.race([
+                    uploadFile(formData),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error("Upload timed out after 30 seconds. Please try again.")), 30000)
+                    )
+                ]);
 
                 if (result.success && result.url) {
                     newFiles.push({ url: result.url, path: result.path || "" });

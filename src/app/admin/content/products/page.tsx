@@ -11,6 +11,7 @@ import {
     updateProduct,
     deleteProduct,
     deleteProducts,
+    bulkUpdateProducts,
     toggleProductAvailability,
     getCategories,
     getOffers,
@@ -34,7 +35,12 @@ import {
     Filter,
     Film,
     FileSpreadsheet,
-    Search
+    Search,
+    Star,
+    StarOff,
+    FolderInput,
+    CheckSquare,
+    XSquare
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -51,6 +57,8 @@ export default function ProductsManager() {
     const [saving, setSaving] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [bulkActionLoading, setBulkActionLoading] = useState(false);
+    const [showBulkCategoryPicker, setShowBulkCategoryPicker] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
 
@@ -297,12 +305,63 @@ export default function ProductsManager() {
         if (selectedIds.size === 0) return;
 
         if (confirm(`Are you sure you want to delete ${selectedIds.size} products? This action cannot be undone.`)) {
-            setLoading(true);
+            setBulkActionLoading(true);
             await deleteProducts(Array.from(selectedIds));
             setSelectedIds(new Set());
             await loadProducts();
-            setLoading(false);
+            setBulkActionLoading(false);
         }
+    };
+
+    const handleBulkAvailability = async (available: boolean) => {
+        if (selectedIds.size === 0) return;
+        setBulkActionLoading(true);
+        // Optimistic update
+        setProducts(prev => prev.map(p =>
+            selectedIds.has(p.id) ? { ...p, available } : p
+        ));
+        const res = await bulkUpdateProducts(Array.from(selectedIds), { available });
+        if (!res.success) {
+            alert("Failed to update availability");
+            await loadProducts(); // Revert
+        }
+        setSelectedIds(new Set());
+        setBulkActionLoading(false);
+    };
+
+    const handleBulkFeatured = async (featured: boolean) => {
+        if (selectedIds.size === 0) return;
+        setBulkActionLoading(true);
+        // Optimistic update
+        setProducts(prev => prev.map(p =>
+            selectedIds.has(p.id) ? { ...p, featured } : p
+        ));
+        const res = await bulkUpdateProducts(Array.from(selectedIds), { featured });
+        if (!res.success) {
+            alert("Failed to update featured status");
+            await loadProducts();
+        }
+        setSelectedIds(new Set());
+        setBulkActionLoading(false);
+    };
+
+    const handleBulkCategoryChange = async (categoryId: string) => {
+        if (selectedIds.size === 0 || !categoryId) return;
+        const catName = getCategoryName(categoryId);
+        if (!confirm(`Move ${selectedIds.size} products to category "${catName}"?`)) return;
+        setBulkActionLoading(true);
+        // Optimistic update
+        setProducts(prev => prev.map(p =>
+            selectedIds.has(p.id) ? { ...p, categoryId } : p
+        ));
+        const res = await bulkUpdateProducts(Array.from(selectedIds), { categoryId });
+        if (!res.success) {
+            alert("Failed to change category");
+            await loadProducts();
+        }
+        setSelectedIds(new Set());
+        setShowBulkCategoryPicker(false);
+        setBulkActionLoading(false);
     };
 
     const handleToggleAvailability = async (id: string, current: boolean) => {
@@ -364,15 +423,7 @@ export default function ProductsManager() {
                         <FileSpreadsheet className="w-5 h-5" />
                         Import Excel
                     </button>
-                    {selectedIds.size > 0 && (
-                        <button
-                            onClick={handleBulkDelete}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors animate-in fade-in zoom-in duration-200"
-                        >
-                            <Trash2 className="w-5 h-5" />
-                            Delete Selected ({selectedIds.size})
-                        </button>
-                    )}
+
                     <button
                         onClick={() => { resetForm(); setShowForm(!showForm); }}
                         className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
@@ -819,9 +870,136 @@ export default function ProductsManager() {
                 onClose={() => setShowImportModal(false)}
                 onSuccess={() => {
                     loadData();
-                    // Optional: show toast or notification
                 }}
             />
+
+            {/* Floating Bulk Action Bar */}
+            {selectedIds.size > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-6 pointer-events-none">
+                    <div className="pointer-events-auto bg-gray-900/95 backdrop-blur-lg text-white rounded-2xl shadow-2xl border border-gray-700/50 px-5 py-3 flex items-center gap-3 flex-wrap max-w-5xl animate-in slide-in-from-bottom-4 fade-in duration-300">
+                        {/* Selection Info */}
+                        <div className="flex items-center gap-2 pr-3 border-r border-gray-700">
+                            <CheckSquare className="w-4 h-4 text-amber-400" />
+                            <span className="font-semibold text-sm whitespace-nowrap">
+                                {selectedIds.size} selected
+                            </span>
+                            <button
+                                onClick={() => setSelectedIds(new Set())}
+                                className="ml-1 p-1 hover:bg-gray-700 rounded-lg transition-colors"
+                                title="Deselect All"
+                            >
+                                <XSquare className="w-4 h-4 text-gray-400 hover:text-white" />
+                            </button>
+                        </div>
+
+                        {/* Availability Actions */}
+                        <button
+                            onClick={() => handleBulkAvailability(true)}
+                            disabled={bulkActionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600/80 hover:bg-green-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                            title="Mark all selected as Available"
+                        >
+                            <Eye className="w-4 h-4" />
+                            Available
+                        </button>
+                        <button
+                            onClick={() => handleBulkAvailability(false)}
+                            disabled={bulkActionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-600/80 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                            title="Mark all selected as Unavailable"
+                        >
+                            <EyeOff className="w-4 h-4" />
+                            Unavailable
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-700" />
+
+                        {/* Featured Actions */}
+                        <button
+                            onClick={() => handleBulkFeatured(true)}
+                            disabled={bulkActionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600/80 hover:bg-amber-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                            title="Mark all selected as Featured"
+                        >
+                            <Star className="w-4 h-4" />
+                            Featured
+                        </button>
+                        <button
+                            onClick={() => handleBulkFeatured(false)}
+                            disabled={bulkActionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-600/80 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                            title="Remove Featured from all selected"
+                        >
+                            <StarOff className="w-4 h-4" />
+                            Unfeature
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-700" />
+
+                        {/* Category Change */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowBulkCategoryPicker(!showBulkCategoryPicker)}
+                                disabled={bulkActionLoading}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/80 hover:bg-blue-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                                title="Move selected to a category"
+                            >
+                                <FolderInput className="w-4 h-4" />
+                                Move Category
+                            </button>
+                            {showBulkCategoryPicker && (
+                                <div className="absolute bottom-full mb-2 left-0 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 py-2 w-56 max-h-64 overflow-y-auto z-50">
+                                    <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Move to...</div>
+                                    {mainCategories.map(cat => (
+                                        <div key={cat.id}>
+                                            <button
+                                                onClick={() => handleBulkCategoryChange(cat.id)}
+                                                className="w-full text-left px-3 py-2 hover:bg-amber-50 text-sm transition-colors flex items-center gap-2"
+                                            >
+                                                <span className="font-medium">{cat.name}</span>
+                                            </button>
+                                            {getSubcategories(cat.id).map(sub => (
+                                                <button
+                                                    key={sub.id}
+                                                    onClick={() => handleBulkCategoryChange(sub.id)}
+                                                    className="w-full text-left px-3 py-2 pl-7 hover:bg-amber-50 text-sm text-gray-600 transition-colors"
+                                                >
+                                                    └ {sub.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ))}
+                                    <div className="border-t border-gray-100 mt-1 pt-1">
+                                        <button
+                                            onClick={() => setShowBulkCategoryPicker(false)}
+                                            className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="w-px h-6 bg-gray-700" />
+
+                        {/* Delete */}
+                        <button
+                            onClick={handleBulkDelete}
+                            disabled={bulkActionLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/80 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                            title="Delete all selected products"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                        </button>
+
+                        {bulkActionLoading && (
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-400 ml-1" />
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
