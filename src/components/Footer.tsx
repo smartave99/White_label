@@ -6,7 +6,7 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Footer() {
     const { config } = useSiteConfig();
-    const { branding, contact } = config;
+    const { branding, contact, footer } = config;
 
     return (
         <footer className="bg-brand-dark text-white pt-24 pb-12 relative overflow-hidden">
@@ -30,11 +30,15 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-slate-400 text-lg leading-relaxed max-w-sm font-light">
-                            {branding.tagline || "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion."}
+                            {footer.tagline}
                         </p>
                         <div className="flex gap-4 pt-4">
-                            {[Facebook, Instagram, Twitter].map((Icon, i) => (
-                                <a key={i} href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime transition-all duration-300">
+                            {[
+                                { Icon: Facebook, url: footer.socialLinks.facebook },
+                                { Icon: Instagram, url: footer.socialLinks.instagram },
+                                { Icon: Twitter, url: footer.socialLinks.twitter },
+                            ].map(({ Icon, url }, i) => (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime transition-all duration-300">
                                     <Icon className="w-4 h-4" />
                                 </a>
                             ))}
@@ -48,23 +52,29 @@ export default function Footer() {
                     <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-10">
                         {/* Shop */}
                         <div>
-                            <h3 className="text-white font-bold text-lg mb-6 tracking-tight">Shop</h3>
+                            <h3 className="text-white font-bold text-lg mb-6 tracking-tight">{footer.navigation.shop.title}</h3>
                             <ul className="space-y-4">
-                                <li><Link href="/departments" className="text-slate-400 hover:text-brand-lime transition-colors">Departments</Link></li>
-                                <li><Link href="/products" className="text-slate-400 hover:text-brand-lime transition-colors">All Products</Link></li>
-                                <li><Link href="/offers" className="text-slate-400 hover:text-brand-lime transition-colors">Weekly Offers</Link></li>
-                                <li><Link href="/new-arrivals" className="text-slate-400 hover:text-brand-lime transition-colors">New Arrivals</Link></li>
+                                {footer.navigation.shop.links.map((link, idx) => (
+                                    <li key={idx}>
+                                        <Link href={link.href} className="text-slate-400 hover:text-brand-lime transition-colors">
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
                         {/* Company */}
                         <div>
-                            <h3 className="text-white font-bold text-lg mb-6 tracking-tight">Company</h3>
+                            <h3 className="text-white font-bold text-lg mb-6 tracking-tight">{footer.navigation.company.title}</h3>
                             <ul className="space-y-4">
-                                <li><Link href="/about" className="text-slate-400 hover:text-brand-lime transition-colors">Our Story</Link></li>
-                                <li><Link href="/careers" className="text-slate-400 hover:text-brand-lime transition-colors">Careers</Link></li>
-                                <li><Link href="/contact" className="text-slate-400 hover:text-brand-lime transition-colors">Contact Us</Link></li>
-                                <li><Link href="/stores" className="text-slate-400 hover:text-brand-lime transition-colors">Store Locator</Link></li>
+                                {footer.navigation.company.links.map((link, idx) => (
+                                    <li key={idx}>
+                                        <Link href={link.href} className="text-slate-400 hover:text-brand-lime transition-colors">
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
@@ -93,9 +103,11 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} {branding.siteName}. All rights reserved.
                     </p>
                     <div className="flex gap-8 text-sm text-slate-500">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-                        <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+                        {footer.bottomLinks.map((link, idx) => (
+                            <Link key={idx} href={link.href} className="hover:text-white transition-colors">
+                                {link.name}
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

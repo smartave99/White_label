@@ -63,7 +63,9 @@ const navGroups: NavGroup[] = [
                     { name: "Highlights", href: "/admin/content/highlights", permission: "highlights" },
                     { name: "Promotions", href: "/admin/content/promotions", permission: "promotions" },
                     { name: "Features", href: "/admin/content/features", permission: "features" },
+                    { name: "Features", href: "/admin/content/features", permission: "features" },
                     { name: "CTA Section", href: "/admin/content/cta", permission: "cta" },
+                    { name: "Footer", href: "/admin/content/footer", permission: "footer" },
                 ]
             },
             { name: "About Us", href: "/admin/content/about", icon: Users, permission: "about" },
