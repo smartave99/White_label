@@ -65,7 +65,7 @@ export default async function Highlights({ content }: { content?: HighlightsCont
                         return (
                             <Link
                                 key={item.id || idx}
-                                href={`/departments#${item.id}`}
+                                href={item.link || `/departments#${item.id}`}
                                 className="group relative h-[500px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-brand-dark/5 hover:shadow-2xl hover:shadow-brand-blue/10 transition-all duration-500"
                             >
                                 {/* Image Container */}

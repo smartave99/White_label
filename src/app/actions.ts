@@ -123,6 +123,7 @@ export interface DepartmentContent {
     description: string;
     icon: string;
     image: string;
+    link?: string;
 }
 
 export interface ContactContent {

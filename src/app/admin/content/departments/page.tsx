@@ -58,7 +58,8 @@ export default function DepartmentsAdminPage() {
                 title: "New Department",
                 description: "Description",
                 image: "", // Placeholder or empty
-                icon: "Package" // Default icon
+                icon: "Package", // Default icon
+                link: ""
             }
         ]);
     };
