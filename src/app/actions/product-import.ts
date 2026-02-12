@@ -60,7 +60,7 @@ export async function importProductsFromExcel(formData: FormData) {
 
         for (const rawRow of rows) {
             // Normalize keys to lowercase
-            const row: Record<string, any> = {};
+            const row: Record<string, unknown> = {};
             Object.keys(rawRow).forEach(key => {
                 row[key.trim().toLowerCase()] = rawRow[key];
             });

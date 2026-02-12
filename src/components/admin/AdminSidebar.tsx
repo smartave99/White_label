@@ -49,7 +49,6 @@ const navGroups: NavGroup[] = [
             { name: "Products", href: "/admin/content/products", icon: ShoppingBag },
             { name: "Categories", href: "/admin/content/categories", icon: Tag },
             { name: "Offers", href: "/admin/content/offers", icon: Megaphone },
-            { name: "Club Tiers", href: "/admin/content/club", icon: Users },
         ]
     },
     {

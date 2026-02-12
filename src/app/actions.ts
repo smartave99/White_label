@@ -594,7 +594,7 @@ export async function getProduct(id: string): Promise<Product | null> {
 
 // Add new product
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createProduct(data: any) {
+export async function createProduct(data: Record<string, unknown>) {
     try {
         const docRef = await getAdminDb().collection("products").add({
             ...data,
@@ -617,7 +617,7 @@ export async function createProduct(data: any) {
 
 // Update product
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateProduct(id: string, data: any) {
+export async function updateProduct(id: string, data: Record<string, unknown>) {
     try {
         await getAdminDb().collection("products").doc(id).update({
             ...data,
