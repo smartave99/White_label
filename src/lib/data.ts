@@ -89,6 +89,7 @@ export interface CTAContent {
     title: string;
     text: string;
     ctaPrimary: string;
+    ctaLink: string;
     ctaSecondary: string;
     backgroundImage: string;
 }
