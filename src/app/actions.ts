@@ -675,6 +675,31 @@ export async function deleteProduct(id: string) {
     }
 }
 
+// Bulk delete products
+export async function deleteProducts(ids: string[]) {
+    try {
+        const batch = getAdminDb().batch();
+        const collection = getAdminDb().collection("products");
+
+        ids.forEach(id => {
+            batch.delete(collection.doc(id));
+        });
+
+        await batch.commit();
+
+        revalidatePath("/");
+        revalidatePath("/products");
+        revalidatePath("/admin/content/products");
+
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    } finally {
+        getSearchCache().clearPrefix("products");
+        getSearchCache().clearPrefix("query");
+    }
+}
+
 // Toggle product availability
 export async function toggleProductAvailability(id: string, available: boolean) {
     try {

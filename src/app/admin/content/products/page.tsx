@@ -10,6 +10,7 @@ import {
     createProduct,
     updateProduct,
     deleteProduct,
+    deleteProducts,
     toggleProductAvailability,
     getCategories,
     getOffers,

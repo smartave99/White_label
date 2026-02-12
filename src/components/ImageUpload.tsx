@@ -3,8 +3,7 @@
 import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { uploadFile } from "@/app/actions/upload";
 
 export interface UploadedFile {
     url: string;
@@ -25,7 +24,7 @@ export default function ImageUpload({
     onUpload,
     folder = "uploads",
     multiple = false,
-    maxFiles = 5,
+    maxFiles = 100, // Effectively unlimited
     className = "",
     currentImages = [],
     onRemove
@@ -57,9 +56,10 @@ export default function ImageUpload({
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                // Check file size (max 20MB)
-                if (file.size > 20 * 1024 * 1024) {
-                    throw new Error(`File ${file.name} is too large (max 20MB)`);
+
+                // Check file size (max 50MB)
+                if (file.size > 50 * 1024 * 1024) {
+                    throw new Error(`File ${file.name} is too large (max 50MB)`);
                 }
 
                 // Check file type
@@ -67,32 +67,28 @@ export default function ImageUpload({
                     throw new Error(`File ${file.name} is not an image`);
                 }
 
-                const timestamp = Date.now();
-                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-                const fullPath = `${folder}/${timestamp}_${safeName}`;
+                // Show progress per file
+                setProgress(Math.round(((i) / files.length) * 100));
 
-                // Use Client-Side SDK Reference
-                const storageRef = ref(storage, fullPath);
-                const uploadTask = uploadBytesResumable(storageRef, file);
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("folder", folder);
 
-                await new Promise<void>((resolve, reject) => {
-                    uploadTask.on(
-                        "state_changed",
-                        (snapshot) => {
-                            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            setProgress(Math.round(p));
-                        },
-                        (err) => {
-                            console.error("Firebase Storage Upload Error:", err);
-                            reject(err);
-                        },
-                        async () => {
-                            const url = await getDownloadURL(uploadTask.snapshot.ref);
-                            newFiles.push({ url, path: fullPath });
-                            resolve();
-                        }
-                    );
-                });
+                // Upload via server action (Admin SDK — bypasses security rules)
+                // Wrap with a 30-second timeout so it never hangs forever
+                const result = await Promise.race([
+                    uploadFile(formData),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error("Upload timed out after 30 seconds. Please try again.")), 30000)
+                    )
+                ]);
+
+                if (result.success && result.url) {
+                    newFiles.push({ url: result.url, path: result.path || "" });
+                    setProgress(Math.round(((i + 1) / files.length) * 100));
+                } else {
+                    throw new Error(result.error || "Failed to upload file");
+                }
             }
 
             onUpload(newFiles);
@@ -102,7 +98,7 @@ export default function ImageUpload({
                 fileInputRef.current.value = "";
             }
         } catch (err) {
-            console.error("Upload process error:", err);
+            console.error("Upload error:", err);
             setError(err instanceof Error ? err.message : "Failed to upload image");
         } finally {
             setUploading(false);

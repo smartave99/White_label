@@ -18,6 +18,7 @@ function getAdminApp() {
 
             admin.initializeApp({
                 credential: admin.credential.cert(firebaseAdminConfig),
+                storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
             });
         } catch (error) {
             console.error("Firebase Admin Initialization Failed:", error);

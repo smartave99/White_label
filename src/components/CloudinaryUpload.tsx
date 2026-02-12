@@ -28,7 +28,7 @@ export default function CloudinaryUpload({
     onUpload,
     folder = "products",
     multiple = false,
-    maxFiles = 5,
+    maxFiles = 100, // Effectively unlimited
     className = "",
     currentImages = [],
     currentVideo = null,
@@ -63,10 +63,10 @@ export default function CloudinaryUpload({
                 const file = files[i];
                 const resourceType = file.type.startsWith("video/") ? "video" : "image";
 
-                // Check file size (max 10MB for video, 5MB for image)
-                const maxSize = resourceType === "video" ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+                // Check file size (max 100MB for video, 50MB for image)
+                const maxSize = resourceType === "video" ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    throw new Error(`File ${file.name} is too large (max ${resourceType === "video" ? "10MB" : "5MB"})`);
+                    throw new Error(`File ${file.name} is too large (max ${resourceType === "video" ? "100MB" : "50MB"})`);
                 }
 
                 // Convert file to base64 for server action
@@ -78,7 +78,13 @@ export default function CloudinaryUpload({
                 reader.readAsDataURL(file);
                 const base64File = await filePromise;
 
-                const result = await uploadToCloudinary(base64File, folder, resourceType);
+                // Upload with 60-second timeout to prevent infinite hang
+                const result = await Promise.race([
+                    uploadToCloudinary(base64File, folder, resourceType),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error("Upload timed out after 60 seconds. Please try again.")), 60000)
+                    )
+                ]);
 
                 if (result.success && result.url && result.publicId) {
                     newFiles.push({
