@@ -23,6 +23,7 @@ const sections = [
     { id: "promotions", label: "Promotions" },
     { id: "features", label: "Features" },
     { id: "cta", label: "CTA Section" },
+    { id: "footer", label: "Footer Section" },
     { id: "products", label: "Products" },
     { id: "categories", label: "Categories" },
     { id: "offers", label: "Offers" },
