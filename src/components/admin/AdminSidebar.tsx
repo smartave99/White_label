@@ -17,16 +17,19 @@ import {
     X,
     ChevronDown,
     ChevronRight,
-    Store
+    Store,
+    Upload
 } from "lucide-react";
+import UploadModal from "@/components/admin/UploadModal";
 
 // Define generic type for nav items to avoid TS errors in the component
 type NavItem = {
     name: string;
     href?: string;
     icon: React.ComponentType<{ className?: string }>;
-    subItems?: { name: string; href: string; permission?: string }[];
+    subItems?: { name: string; href: string; permission?: string; uploadFolder?: string }[];
     permission?: string;
+    uploadFolder?: string;
 };
 
 type NavGroup = {
@@ -59,24 +62,26 @@ const navGroups: NavGroup[] = [
                 href: "/admin/storefront",
                 permission: "storefront",
                 subItems: [
-                    { name: "Hero Section", href: "/admin/content/hero", permission: "hero" },
-                    { name: "Highlights", href: "/admin/content/highlights", permission: "highlights" },
-                    { name: "Promotions", href: "/admin/content/promotions", permission: "promotions" },
-                    { name: "Features", href: "/admin/content/features", permission: "features" },
-                    { name: "CTA Section", href: "/admin/content/cta", permission: "cta" },
-                    { name: "Footer", href: "/admin/content/footer", permission: "footer" },
+                    { name: "Hero Section", href: "/admin/content/hero", permission: "hero", uploadFolder: "hero" },
+                    { name: "Highlights", href: "/admin/content/highlights", permission: "highlights", uploadFolder: "homepage" },
+                    { name: "Promotions", href: "/admin/content/promotions", permission: "promotions", uploadFolder: "promotions" },
+                    { name: "Features", href: "/admin/content/features", permission: "features", uploadFolder: "homepage" },
+                    { name: "CTA Section", href: "/admin/content/cta", permission: "cta", uploadFolder: "homepage" },
+                    { name: "Footer", href: "/admin/content/footer", permission: "footer", uploadFolder: "branding" },
                 ]
             },
-            { name: "About Us", href: "/admin/content/about", icon: Users, permission: "about" },
-            { name: "Departments", href: "/admin/content/departments-page", icon: Tag, permission: "departments" },
-            { name: "Shop Page", href: "/admin/content/products-page", icon: Store, permission: "products-page" },
-            { name: "Special Offers", href: "/admin/content/offers-page", icon: Megaphone, permission: "offers-page" },
+            { name: "About Us", href: "/admin/content/about", icon: Users, permission: "about", uploadFolder: "about" },
+            { name: "Departments", href: "/admin/content/departments-page", icon: Tag, permission: "departments", uploadFolder: "departments" },
+            { name: "Shop Page", href: "/admin/content/products-page", icon: Store, permission: "products-page", uploadFolder: "products" },
+            { name: "Special Offers", href: "/admin/content/offers-page", icon: Megaphone, permission: "offers-page", uploadFolder: "offers" },
         ]
     },
     {
         title: "Content",
         items: [
-            { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews" },
+            { name: "Products", href: "/admin/content/products", icon: ShoppingBag, permission: "products", uploadFolder: "products" },
+            { name: "Categories", href: "/admin/content/categories", icon: Tag, permission: "categories", uploadFolder: "categories" },
+            { name: "Reviews", href: "/admin/content/reviews", icon: MessageSquare, permission: "reviews", uploadFolder: "reviews" },
             { name: "Requests", href: "/admin/requests", icon: MessageSquare, permission: "requests" },
         ]
     },
@@ -107,6 +112,27 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
         "Homepage": true
     });
+
+    // Upload Modal State
+    const [uploadConfig, setUploadConfig] = useState<{
+        isOpen: boolean;
+        folder: string;
+        title: string;
+    }>({
+        isOpen: false,
+        folder: "",
+        title: ""
+    });
+
+    const openUpload = (e: React.MouseEvent, folder: string, title: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setUploadConfig({
+            isOpen: true,
+            folder,
+            title: `Upload to ${title}`
+        });
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -234,6 +260,16 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                                                             <Icon className={`w-4 h-4 ${isActive ? "text-brand-gold" : "text-white/50"}`} />
                                                             <span className="flex-1">{item.name}</span>
 
+                                                            {item.uploadFolder && (
+                                                                <button
+                                                                    onClick={(e) => openUpload(e, item.uploadFolder!, item.name)}
+                                                                    className="p-1 hover:bg-white/20 rounded-md text-white/40 hover:text-brand-gold transition-colors opacity-0 group-hover:opacity-100 lg:opacity-100 mr-1"
+                                                                    title={`Upload to ${item.name}`}
+                                                                >
+                                                                    <Upload className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            )}
+
                                                             {hasSubItems && (
                                                                 <button
                                                                     onClick={(e) => toggleItem(item.name, e)}
@@ -266,7 +302,18 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                                                                             }
                                                                         `}
                                                                     >
-                                                                        {sub.name}
+                                                                        <div className="flex items-center justify-between group/sub">
+                                                                            <span>{sub.name}</span>
+                                                                            {sub.uploadFolder && (
+                                                                                <button
+                                                                                    onClick={(e) => openUpload(e, sub.uploadFolder!, sub.name)}
+                                                                                    className="p-1 hover:bg-white/20 rounded-md text-white/30 hover:text-brand-gold transition-colors opacity-0 group-hover/sub:opacity-100"
+                                                                                    title={`Upload to ${sub.name}`}
+                                                                                >
+                                                                                    <Upload className="w-3 h-3" />
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
                                                                     </Link>
                                                                 );
                                                             })}
@@ -302,6 +349,13 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                     </button>
                 </div>
             </aside>
+
+            <UploadModal
+                isOpen={uploadConfig.isOpen}
+                onClose={() => setUploadConfig(prev => ({ ...prev, isOpen: false }))}
+                folder={uploadConfig.folder}
+                title={uploadConfig.title}
+            />
         </>
     );
 }

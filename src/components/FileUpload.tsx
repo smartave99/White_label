@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Upload, X, Loader2, FileText } from "lucide-react";
-import { uploadToCloudinary } from "@/app/cloudinary-actions";
+import { uploadFile } from "@/app/actions/upload";
 
 export interface UploadedFile {
     url: string;
@@ -60,31 +60,20 @@ export default function FileUpload({
                     throw new Error(`File ${file.name} is too large (max 50MB)`);
                 }
 
-                // Convert file to base64 for server action
-                const reader = new FileReader();
-                const filePromise = new Promise<string>((resolve, reject) => {
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                });
-                reader.readAsDataURL(file);
-                const base64File = await filePromise;
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("folder", folder);
 
-                // Determine resource type based on file type
-                let resourceType: "image" | "video" | "raw" | "auto" = "auto";
-                if (file.type.startsWith("image/")) resourceType = "image";
-                else if (file.type.startsWith("video/")) resourceType = "video";
-                else resourceType = "raw";
-
-                // Upload with 60-second timeout
+                // Upload with 30-second timeout to prevent infinite hang
                 const result = await Promise.race([
-                    uploadToCloudinary(base64File, folder, resourceType),
+                    uploadFile(formData),
                     new Promise<never>((_, reject) =>
-                        setTimeout(() => reject(new Error("Upload timed out after 60 seconds. Please try again.")), 60000)
+                        setTimeout(() => reject(new Error("Upload timed out after 30 seconds. Please try again.")), 30000)
                     )
                 ]);
 
                 if (result.success && result.url) {
-                    newFiles.push({ url: result.url, path: result.publicId || "" });
+                    newFiles.push({ url: result.url, path: result.path || "" });
                 } else {
                     throw new Error(result.error || "Failed to upload file");
                 }

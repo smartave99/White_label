@@ -20,6 +20,20 @@ export async function uploadFile(formData: FormData) {
         const storage = getAdminStorage();
         const bucket = storage.bucket();
 
+        // Check if bucket exists to provide better error message
+        const [exists] = await bucket.exists().catch(err => {
+            console.error("Bucket exists check failed:", err);
+            throw new Error(`Firebase Storage access error: ${err.message}. Check if your service account has "Storage Admin" or "Storage Object Admin" permissions.`);
+        });
+
+        if (!exists) {
+            const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "undefined";
+            return {
+                success: false,
+                error: `Firebase Storage bucket "${bucketName}" not found (404). Please ensure Storage is enabled in the Firebase Console and the bucket name in .env.local is exactly correct.`
+            };
+        }
+
         const timestamp = Date.now();
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
         const filePath = `${folder}/${timestamp}_${safeName}`;
@@ -33,22 +47,15 @@ export async function uploadFile(formData: FormData) {
 
         // Make the file public
         await fileRef.makePublic();
-
-        // Construct the public URL
-        // Firebase Storage public URLs are typically: 
-        // https://storage.googleapis.com/BUCKET_NAME/FILE_PATH
-        // OR via Firebase API: https://firebasestorage.googleapis.com/v0/b/BUCKET_NAME/o/FILE_PATH?alt=media
-
-        // Let's try to get the signed URL or public URL.
         const publicUrl = fileRef.publicUrl();
-
-        // The publicUrl() method returns a URL that might be direct GCS link.
-        // https://storage.googleapis.com/${bucket.name}/${filePath}
 
         return { success: true, url: publicUrl, path: filePath };
 
     } catch (error) {
         console.error("Server upload error:", error);
-        return { success: false, error: error instanceof Error ? error.message : "Upload failed" };
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Upload failed"
+        };
     }
 }
