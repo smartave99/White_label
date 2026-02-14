@@ -20,12 +20,12 @@ export default function Footer() {
                     {/* Brand Column - Spans 4 columns */}
                     <div className="lg:col-span-4 space-y-6">
                         <Link href="/" className="block">
-                            <div className="relative w-48 h-12">
+                            <div className="relative w-auto h-16 max-w-[200px]">
                                 <Image
                                     src={footer.logoUrl || branding.logoUrl || "/logo.png"}
                                     alt={branding.siteName}
                                     fill
-                                    className="object-contain brightness-0 invert"
+                                    className="object-contain object-left"
                                 />
                             </div>
                         </Link>

@@ -5,9 +5,10 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   disable: process.env.NODE_ENV === "development",
   // NetworkFirst strategy for all document requests to avoid stale data
   cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  aggressiveFrontEndNavCaching: false,
   reloadOnOnline: true,
   swcMinify: true,
+  skipWaiting: true,
   extendDefaultRuntimeCaching: true,
   workboxOptions: {
     disableDevLogs: true,
@@ -62,9 +63,10 @@ const withPWA = require("@ducanh2912/next-pwa").default({
       },
       {
         urlPattern: /\.(?:js)$/i,
-        handler: "StaleWhileRevalidate",
+        handler: "NetworkFirst",
         options: {
           cacheName: "static-js-assets",
+          networkTimeoutSeconds: 5,
           expiration: {
             maxEntries: 32,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
@@ -73,9 +75,10 @@ const withPWA = require("@ducanh2912/next-pwa").default({
       },
       {
         urlPattern: /\.(?:css|less)$/i,
-        handler: "StaleWhileRevalidate",
+        handler: "NetworkFirst",
         options: {
           cacheName: "static-style-assets",
+          networkTimeoutSeconds: 5,
           expiration: {
             maxEntries: 32,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours

@@ -186,13 +186,13 @@ export default function FooterEditor() {
                                     </p>
                                 </div>
                                 <div className="bg-brand-dark rounded-lg p-8 flex items-center justify-center border border-gray-200">
-                                    <div className="relative w-48 h-12">
+                                    <div className="relative w-full h-24">
                                         {config.footer.logoUrl || config.branding.logoUrl ? (
                                             <Image
                                                 src={config.footer.logoUrl || config.branding.logoUrl || ""}
                                                 alt="Footer Logo Preview"
                                                 fill
-                                                className="object-contain brightness-0 invert"
+                                                className="object-contain object-center"
                                                 unoptimized
                                             />
                                         ) : (
