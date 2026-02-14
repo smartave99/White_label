@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Download } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -82,8 +83,8 @@ export default function PwaInstallPrompt() {
                     className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96"
                 >
                     <div className="bg-white rounded-xl shadow-2xl p-4 border border-blue-100 flex items-start gap-4">
-                        <div className="bg-blue-100 p-3 rounded-full shrink-0">
-                            <Download className="w-6 h-6 text-blue-600" />
+                        <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-blue-100">
+                            <Image src="/logo.png" alt="Smart Avenue 99" width={48} height={48} className="w-full h-full object-contain" />
                         </div>
 
                         <div className="flex-1">
