@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Filter, ChevronDown, Check, Star } from "lucide-react";
+import { X, Filter, ChevronDown, Check } from "lucide-react";
 import { FilterState, parseSearchParams, buildSearchParams, SORT_OPTIONS } from "@/lib/filter-utils";
 import { Category, ProductsPageContent } from "@/app/actions";
 
@@ -13,7 +13,7 @@ interface FilterSidebarProps {
     settings?: Partial<ProductsPageContent>;
 }
 
-export default function FilterSidebar({ categories, maxPriceRange = 100000, settings }: FilterSidebarProps) {
+export default function FilterSidebar({ categories, settings }: FilterSidebarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);

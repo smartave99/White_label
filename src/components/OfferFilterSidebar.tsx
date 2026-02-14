@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Filter, ChevronDown, Check, Search } from "lucide-react";
+import { X, Filter, ChevronDown, Search } from "lucide-react";
 
 export default function OfferFilterSidebar() {
     const router = useRouter();

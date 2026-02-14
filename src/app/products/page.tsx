@@ -1,4 +1,4 @@
-import { getProducts, getCategories, getOffers, searchProducts, getSiteContent, ProductsPageContent } from "@/app/actions";
+import { getProducts, getCategories, getOffers, getSiteContent, ProductsPageContent } from "@/app/actions";
 import Link from "next/link";
 import { Package, ChevronRight, Zap, Tag, Star } from "lucide-react";
 import Image from "next/image";

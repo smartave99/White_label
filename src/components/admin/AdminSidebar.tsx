@@ -19,7 +19,11 @@ import {
     ChevronRight,
     Store,
     Search,
-    PanelBottom
+    PanelBottom,
+    ClipboardList,
+    Smartphone,
+    Palette,
+    Settings
 } from "lucide-react";
 
 // Define generic type for nav items to avoid TS errors in the component
