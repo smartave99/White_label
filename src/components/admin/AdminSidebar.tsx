@@ -22,7 +22,8 @@ import {
     Paintbrush,
     Palette,
     Smartphone,
-    Settings
+    Settings,
+    ClipboardList
 } from "lucide-react";
 import UploadModal from "@/components/admin/UploadModal";
 
