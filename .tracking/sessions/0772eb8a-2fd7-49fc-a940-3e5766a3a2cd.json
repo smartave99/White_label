@@ -1,0 +1,14 @@
+{
+  "sessionId": "0772eb8a-2fd7-49fc-a940-3e5766a3a2cd",
+  "taskId": "test-hooks-2",
+  "startTime": "2026-02-14T19:27:10.546Z",
+  "status": "active",
+  "events": [
+    {
+      "timestamp": "2026-02-14T19:34:00.141Z",
+      "type": "commit",
+      "author": "user",
+      "content": "Commit: 432cfe51b80a1a6cf7f215a76a24f20f0de48526 - Test commit for hooks\n\nTask: test-hooks-2"
+    }
+  ]
+}
