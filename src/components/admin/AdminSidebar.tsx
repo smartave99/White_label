@@ -184,7 +184,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }: { mobileOpen
                     {navGroups.map((group) => {
                         // Helper to check if a user has access
                         const hasAccess = (permission?: string) => {
-                            if (role === "Admin" || (permissions && permissions.includes("*"))) return true;
+                            if (role?.toLowerCase() === "admin" || (permissions && permissions.includes("*"))) return true;
                             if (!permission) return true;
                             return permissions && permissions.includes(permission);
                         };
