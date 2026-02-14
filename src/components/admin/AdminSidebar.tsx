@@ -72,7 +72,7 @@ const navGroups: NavGroup[] = [
                 ]
             },
             { name: "About Us", href: "/admin/content/about", icon: Users, permission: "about", uploadFolder: "about" },
-            { name: "Departments", href: "/admin/content/departments-page", icon: Tag, permission: "departments", uploadFolder: "departments" },
+            { name: "Departments", href: "/admin/content/departments", icon: Tag, permission: "departments", uploadFolder: "departments" },
             { name: "Shop Page", href: "/admin/content/products-page", icon: Store, permission: "products-page", uploadFolder: "products" },
             { name: "Special Offers", href: "/admin/content/offers-page", icon: Megaphone, permission: "offers-page", uploadFolder: "offers" },
         ]

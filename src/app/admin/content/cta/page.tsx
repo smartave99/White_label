@@ -10,6 +10,7 @@ import {
     Save,
 } from "lucide-react";
 import Link from "next/link";
+import ImageUpload, { UploadedFile } from "@/components/ImageUpload";
 
 const defaultCTA: CTAContent = {
     title: "Ready to experience the new standard?",
@@ -17,7 +18,8 @@ const defaultCTA: CTAContent = {
     ctaPrimary: "Start Shopping",
     ctaLink: "/products",
     ctaSecondary: "Chat with Us",
-    backgroundImage: ""
+    backgroundImage: "",
+    images: []
 };
 
 export default function CTAEditor() {
@@ -144,7 +146,27 @@ export default function CTAEditor() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Background Image URL (Optional)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Background Images (Carousel)</label>
+                                <p className="text-sm text-gray-500 mb-3">Upload multiple images to create an automatic sliding background. If no images are uploaded, the single background image URL below will be used.</p>
+
+                                <ImageUpload
+                                    folder="cta-backgrounds"
+                                    multiple={true}
+                                    currentImages={content.images || []}
+                                    onUpload={(files: UploadedFile[]) => {
+                                        const newImages = [...(content.images || []), ...files.map((f: UploadedFile) => f.url)];
+                                        setContent({ ...content, images: newImages });
+                                    }}
+                                    onRemove={(index: number) => {
+                                        const newImages = [...(content.images || [])];
+                                        newImages.splice(index, 1);
+                                        setContent({ ...content, images: newImages });
+                                    }}
+                                />
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-100">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Legacy Background Image URL (Fallback)</label>
                                 <input
                                     type="url"
                                     value={content.backgroundImage}

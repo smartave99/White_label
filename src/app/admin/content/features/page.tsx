@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as Icons from "lucide-react";
+import Image from "next/image";
+import CloudinaryUpload from "@/components/CloudinaryUpload";
 
 // Helper to get available icons
 const iconList = [
@@ -170,25 +172,31 @@ export default function FeaturesEditor() {
                                         </button>
 
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                                            <div className="md:col-span-1">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
-                                                <select
-                                                    value={item.icon}
-                                                    onChange={(e) => updateItem(index, 'icon', e.target.value)}
-                                                    className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm"
-                                                >
-                                                    {iconList.map(icon => (
-                                                        <option key={icon} value={icon}>{icon}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="mt-2 flex justify-center text-brand-blue">
-                                                    {(() => {
-                                                        const IconComponent = Icons[item.icon as keyof typeof Icons] as React.ElementType;
-                                                        return IconComponent ? <IconComponent className="w-6 h-6 text-gray-600" /> : null;
-                                                    })()}
-                                                </div>
+                                            <div className="md:col-span-1 flex items-start justify-center pt-8">
+                                                {(() => {
+                                                    const isUrl = item.icon.startsWith("http") || item.icon.startsWith("/");
+
+                                                    if (isUrl) {
+                                                        return (
+                                                            <div className="relative w-8 h-8">
+                                                                <Image
+                                                                    src={item.icon}
+                                                                    alt="Feature icon"
+                                                                    fill
+                                                                    className="object-contain"
+                                                                    unoptimized
+                                                                />
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    const IconComponent = Icons[item.icon as keyof typeof Icons] as React.ElementType;
+                                                    return IconComponent ? <IconComponent className="w-6 h-6 text-gray-600" /> : null;
+                                                })()}
                                             </div>
-                                            <div className="md:col-span-4">
+                                        </div>
+                                        <div className="md:col-span-5 space-y-4">
+                                            <div>
                                                 <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
                                                 <input
                                                     type="text"
@@ -197,15 +205,74 @@ export default function FeaturesEditor() {
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                 />
                                             </div>
-                                            <div className="md:col-span-7">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
-                                                <input
-                                                    type="text"
-                                                    value={item.desc}
-                                                    onChange={(e) => updateItem(index, 'desc', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                />
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">Icon Source</label>
+                                                <div className="flex items-center gap-4 mb-2">
+                                                    <label className="flex items-center gap-1 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name={`icon-type-${index}`}
+                                                            checked={!item.icon.startsWith("http") && !item.icon.startsWith("/")}
+                                                            onChange={() => updateItem(index, 'icon', 'ShieldCheck')}
+                                                            className="text-amber-500 focus:ring-amber-500"
+                                                        />
+                                                        <span className="text-sm">Standard Icon</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-1 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name={`icon-type-${index}`}
+                                                            checked={item.icon.startsWith("http") || item.icon.startsWith("/")}
+                                                            onChange={() => updateItem(index, 'icon', '')}
+                                                            className="text-amber-500 focus:ring-amber-500"
+                                                        />
+                                                        <span className="text-sm">Upload Custom</span>
+                                                    </label>
+                                                </div>
+
+                                                {(!item.icon.startsWith("http") && !item.icon.startsWith("/")) ? (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-500 mb-1">Select Icon</label>
+                                                        <select
+                                                            value={item.icon}
+                                                            onChange={(e) => updateItem(index, 'icon', e.target.value)}
+                                                            className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm"
+                                                        >
+                                                            {iconList.map(icon => (
+                                                                <option key={icon} value={icon}>{icon}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-gray-500 mb-1">Upload Icon</label>
+                                                        <div className="flex gap-2 items-center">
+                                                            <div className="flex-1">
+                                                                <CloudinaryUpload
+                                                                    folder="features"
+                                                                    multiple={false}
+                                                                    currentImages={item.icon ? [item.icon] : []}
+                                                                    onUpload={(files) => {
+                                                                        if (files.length > 0) {
+                                                                            updateItem(index, 'icon', files[0].url);
+                                                                        }
+                                                                    }}
+                                                                    onRemoveImage={() => updateItem(index, 'icon', '')}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
+                                        </div>
+                                        <div className="md:col-span-6">
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                                            <textarea
+                                                value={item.desc}
+                                                onChange={(e) => updateItem(index, 'desc', e.target.value)}
+                                                rows={5}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                                            />
                                         </div>
                                     </div>
                                 ))}

@@ -64,6 +64,10 @@ export interface FooterConfig {
     logoUrl?: string;
     logoPublicId?: string;
     tagline: string;
+    newsletter: {
+        title: string;
+        description: string;
+    };
     socialLinks: {
         facebook: string;
         instagram: string;
@@ -151,6 +155,10 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     footer: {
         logoUrl: "",
         tagline: "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion.",
+        newsletter: {
+            title: "Join the Movement",
+            description: "Get the latest collections and exclusive offers sent to your inbox.",
+        },
         socialLinks: {
             facebook: "#",
             instagram: "#",

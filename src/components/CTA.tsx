@@ -1,25 +1,70 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import ChatTriggerButton from "@/components/ChatTriggerButton";
 import { CTAContent } from "@/app/actions";
 
-export default function CTA({ content }: { content?: CTAContent }) {
-    const defaultContent: CTAContent = {
-        title: "Ready to experience the new standard?",
-        text: "Join thousands of smart shoppers transforming their lifestyle with Smart Avenue.",
-        ctaPrimary: "Browse Catalog",
-        ctaLink: "/products",
-        ctaSecondary: "Chat with Us",
-        backgroundImage: "" // Default gradient used
-    };
+const defaultContent: CTAContent = {
+    title: "Ready to experience the new standard?",
+    text: "Join thousands of smart shoppers transforming their lifestyle with Smart Avenue.",
+    ctaPrimary: "Browse Catalog",
+    ctaLink: "/products",
+    ctaSecondary: "Chat with Us",
+    backgroundImage: "", // Default gradient used
+    images: []
+};
 
+export default function CTA({ content }: { content?: CTAContent }) {
     const finalContent = content || defaultContent;
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const images = useMemo(() => {
+        return finalContent.images && finalContent.images.length > 0
+            ? finalContent.images
+            : (finalContent.backgroundImage ? [finalContent.backgroundImage] : []);
+    }, [finalContent.images, finalContent.backgroundImage]);
+
+    useEffect(() => {
+        if (images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [images]);
 
     return (
-        <section className="py-24 relative overflow-hidden">
-            <div className="absolute inset-0 bg-brand-dark">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 to-brand-lime/20 mix-blend-overlay" />
-                <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/30 via-transparent to-transparent opacity-50" />
+        <section className="py-24 relative overflow-hidden min-h-[500px] flex items-center">
+            {/* Background Carousel */}
+            <div className="absolute inset-0 z-0">
+                {images.length > 0 ? (
+                    images.map((img, index) => (
+                        <div
+                            key={img}
+                            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                                }`}
+                        >
+                            <Image
+                                src={img}
+                                alt="Background"
+                                fill
+                                className="object-cover"
+                                priority={index === 0}
+                            />
+                            {/* Overlay for readability */}
+                            <div className="absolute inset-0 bg-black/60" />
+                        </div>
+                    ))
+                ) : (
+                    <div className="absolute inset-0 bg-brand-dark">
+                        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 to-brand-lime/20 mix-blend-overlay" />
+                        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue/30 via-transparent to-transparent opacity-50" />
+                    </div>
+                )}
             </div>
 
             <div className="container mx-auto px-4 relative z-10 text-center">

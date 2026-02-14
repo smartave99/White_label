@@ -153,6 +153,7 @@ export interface CTAContent {
     ctaLink: string;
     ctaSecondary: string;
     backgroundImage: string;
+    images?: string[];
 }
 
 export interface HighlightsContent {
