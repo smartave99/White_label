@@ -4,6 +4,7 @@ export interface BrandingConfig {
     logoUrl: string;
     faviconUrl: string;
     posterUrl?: string;
+    pwaScreenshotUrl?: string;
     instagramUrl?: string;
     whatsappUrl?: string;
 }
@@ -112,6 +113,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         logoUrl: "/logo.png",
         faviconUrl: "/favicon.ico",
         posterUrl: "",
+        pwaScreenshotUrl: "",
         instagramUrl: "",
         whatsappUrl: ""
     },
