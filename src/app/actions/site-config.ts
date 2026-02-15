@@ -52,9 +52,42 @@ export const getSiteConfig = cache(async function getSiteConfig(): Promise<SiteC
             theme: { ...DEFAULT_SITE_CONFIG.theme, ...data.theme },
             hero: mergedHero,
             promotions: { ...DEFAULT_SITE_CONFIG.promotions, ...data.promotions },
-            footer: { ...DEFAULT_SITE_CONFIG.footer, ...data.footer },
+            footer: {
+                ...DEFAULT_SITE_CONFIG.footer,
+                ...data.footer,
+                navigation: {
+                    shop: {
+                        title: "Shop",
+                        links: [
+                            { name: "Departments", href: "/departments" },
+                            { name: "All Products", href: "/products" },
+                            { name: "Weekly Offers", href: "/offers" },
+                        ]
+                    },
+                    company: {
+                        title: "Company",
+                        links: [
+                            { name: "Our Story", href: "/about" },
+                            { name: "Contact Us", href: "/contact" },
+                        ]
+                    }
+                },
+                bottomLinks: [
+                    { name: "Privacy Policy", href: "/privacy" },
+                    { name: "Terms of Service", href: "/terms" },
+                    { name: "Sitemap", href: "/sitemap.xml" },
+                ]
+            },
             sections: { ...DEFAULT_SITE_CONFIG.sections, ...data.sections },
-            contact: { ...DEFAULT_SITE_CONFIG.contact, ...data.contact },
+            contact: {
+                ...DEFAULT_SITE_CONFIG.contact,
+                ...data.contact,
+                phone: "",
+                email: "",
+                address: "",
+                mapEmbedUrl: "",
+                storeHours: "",
+            },
         };
     } catch (error) {
         console.error("Error fetching site config:", error);

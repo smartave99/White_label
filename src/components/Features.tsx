@@ -13,35 +13,11 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function Features({ content }: { content?: FeaturesContent }) {
-    // Default fallback content
-    const defaultContent: FeaturesContent = {
-        title: "Smart Shopping,\nElevated Experience.",
-        subtitle: "Values",
-        items: [
-            {
-                title: "Premium Quality",
-                desc: "Certified authentic products sourcing from global brands.",
-                icon: "ShieldCheck"
-            },
-            {
-                title: "Personal Shopping",
-                desc: "Expert assistance to help you find exactly what you need.",
-                icon: "Zap"
-            },
-            {
-                title: "Global Standards",
-                desc: "International shopping experience right in your city.",
-                icon: "Globe"
-            },
-            {
-                title: "Trusted Service",
-                desc: "24/7 dedicated support and easy returns policy.",
-                icon: "CheckCircle2"
-            },
-        ]
-    };
+    if (!content || !content.items || content.items.length === 0) {
+        return null;
+    }
 
-    const finalContent = content || defaultContent;
+    const finalContent = content;
 
     return (
         <section className="py-24 bg-white relative overflow-hidden">

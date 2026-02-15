@@ -22,15 +22,9 @@ const iconList = [
 ];
 
 const defaultFeatures: FeaturesContent = {
-    title: "Smart Shopping,\nElevated Experience.",
-    subtitle: "Values",
-    items: [
-        {
-            title: "Premium Quality",
-            desc: "Certified authentic products sourcing from global brands.",
-            icon: "ShieldCheck"
-        }
-    ]
+    title: "",
+    subtitle: "",
+    items: []
 };
 
 export default function FeaturesEditor() {

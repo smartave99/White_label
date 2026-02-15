@@ -21,13 +21,12 @@ export default async function Highlights({ content }: { content?: HighlightsCont
         return null;
     }
 
-    const defaultContent: HighlightsContent = {
-        title: "Curated Zones",
-        subtitle: "Departments",
-        description: "Navigate through our specialized departments, each designed to offer the finest in quality and innovation."
-    };
+    // If no content provided, do not render
+    if (!content) {
+        return null;
+    }
 
-    const finalContent = content || defaultContent;
+    const finalContent = content;
 
     return (
         <section className="py-24 bg-slate-50 relative overflow-hidden">

@@ -34,9 +34,9 @@ import Link from "next/link";
 import CloudinaryUpload from "@/components/CloudinaryUpload";
 
 const defaultHighlights: HighlightsContent = {
-    title: "Curated Zones",
-    subtitle: "Departments",
-    description: "Navigate through our specialized departments, each designed to offer the finest in quality and innovation."
+    title: "",
+    subtitle: "",
+    description: ""
 };
 
 const availableIcons: { name: string; icon: LucideIcon }[] = [
@@ -248,8 +248,8 @@ export default function HighlightsEditor() {
                                         <div
                                             key={dept.id}
                                             className={`p-5 rounded-xl border transition-all ${isHighlighted
-                                                    ? "border-amber-200 bg-amber-50/30"
-                                                    : "border-gray-100 bg-gray-50/30"
+                                                ? "border-amber-200 bg-amber-50/30"
+                                                : "border-gray-100 bg-gray-50/30"
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between mb-4">

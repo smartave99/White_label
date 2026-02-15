@@ -12,7 +12,8 @@ import {
     ExternalLink,
     LineChart,
     Settings2,
-    ArrowRight
+    ArrowRight,
+    Megaphone
 } from "lucide-react";
 import Link from "next/link";
 
@@ -43,6 +44,15 @@ const homepageSections = [
         color: "text-brand-lime",
         bgColor: "bg-brand-lime/10",
         stats: "Service Benefits"
+    },
+    {
+        name: "Promotions",
+        description: "Manage promotional banners and special offers.",
+        href: "/admin/content/promotions",
+        icon: Megaphone,
+        color: "text-brand-gold",
+        bgColor: "bg-brand-gold/10",
+        stats: "Special Offers"
     },
     {
         name: "CTA Section",
