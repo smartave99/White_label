@@ -1,7 +1,7 @@
 
-import * as admin from "firebase-admin";
-import * as dotenv from "dotenv";
-import * as path from "path";
+const admin = require("firebase-admin");
+const path = require("path");
+const dotenv = require("dotenv");
 
 // Load .env.local explicitly
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -29,29 +29,26 @@ async function run() {
 
         console.log("Attempting query: products where available == true (NO ORDER BY)");
 
-        // This query queries filters by available=true but does NOT sort by createdAt in the DB
-        // allowing us to bypass the missing composite index.
         const snapshot = await db.collection("products")
             .where("available", "==", true)
-            .get(); // NO orderBy here
+            .get();
 
         console.log(`Query successful! Found ${snapshot.size} products.`);
 
-        // Simulate in-memory sort
-        const products = snapshot.docs.map((doc: any) => ({
+        const products = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            createdAt: (doc.data().createdAt as any)?.toDate() || new Date()
+            createdAt: doc.data().createdAt?.toDate() || new Date()
         }));
 
-        products.sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
+        products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
         console.log("Top 3 available products (sorted in-memory):");
-        products.slice(0, 3).forEach((p: any) => {
+        products.slice(0, 3).forEach(p => {
             console.log(`- ${p.id}: ${p.name} (available: ${p.available})`);
         });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Script failed!", error);
     }
 }
