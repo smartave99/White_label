@@ -146,20 +146,34 @@ export default function ProductsManager() {
             setLoading(true);
         }
 
-        const categoryFilter = filterCategory || undefined;
+        // Determine if selected category is a subcategory
+        let categoryId: string | undefined = undefined;
+        let subcategoryId: string | undefined = undefined;
+
+        if (filterCategory) {
+            // Check if it's a subcategory (has parentId)
+            const cat = categories.find(c => c.id === filterCategory);
+            if (cat?.parentId) {
+                subcategoryId = filterCategory;
+            } else {
+                categoryId = filterCategory;
+            }
+        }
+
         // Correctly parse available filter: "true" -> true, "false" -> false, "" -> undefined
         const availableFilter = filterAvailable === "" ? undefined : filterAvailable === "true";
 
         let data: Product[] = [];
 
         if (searchQuery.trim()) {
-            // Pass the availableFilter directly instead of hardcoded true (which was includeUnavailable)
-            data = await searchProducts(searchQuery, categoryFilter, undefined, availableFilter);
+            // Pass the availableFilter directly (tri-state)
+            data = await searchProducts(searchQuery, categoryId, subcategoryId, availableFilter);
             setHasMore(false); // Search fetches a large batch, don't paginate for now
         } else {
-            const limit = 20000;
+            const limit = 20000; // Keep high limit as we do client-side sort optimization in actions
             const startAfter = isLoadMore ? products[products.length - 1]?.id : undefined;
-            data = await getProducts(categoryFilter, availableFilter, limit, startAfter);
+            // Pass subcategory and available filter
+            data = await getProducts(categoryId, availableFilter, limit, startAfter, subcategoryId);
             setHasMore(data.length === limit);
         }
 
@@ -170,7 +184,7 @@ export default function ProductsManager() {
         }
         setLoading(false);
         setLoadingMore(false);
-    }, [filterCategory, filterAvailable, searchQuery, products]);
+    }, [filterCategory, filterAvailable, searchQuery, products, categories]);
 
 
     useEffect(() => {

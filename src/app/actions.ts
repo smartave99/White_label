@@ -507,12 +507,13 @@ export const getProducts = cache(async function getProducts(
     categoryId?: string,
     available?: boolean,
     limitCount: number = 200, // Increased default for better initial visibility
-    startAfterId?: string
+    startAfterId?: string,
+    subcategoryId?: string // New parameter
 ): Promise<Product[]> {
     const cache = getSearchCache();
 
     // For simple queries (all products, no filters, no pagination), use cache
-    const canUseCache = !startAfterId && !categoryId && available === undefined && limitCount >= 50;
+    const canUseCache = !startAfterId && !categoryId && !subcategoryId && available === undefined && limitCount >= 50;
     if (canUseCache) {
         const cacheKey = CacheKeys.allProducts();
         const cached = cache.get<Product[]>(cacheKey);
@@ -524,21 +525,33 @@ export const getProducts = cache(async function getProducts(
     try {
         let query: admin.firestore.Query = getAdminDb().collection("products");
 
-        if (categoryId) {
+        // Apply filters
+        if (subcategoryId) {
+            query = query.where("subcategoryId", "==", subcategoryId);
+        } else if (categoryId) {
             query = query.where("categoryId", "==", categoryId);
         }
 
-        // Logic to avoid missing index error:
-        // If filtering by 'available', we cannot sort by 'createdAt' without a composite index.
-        // So we skip DB sorting and sort in memory.
-        let snapshot;
-
         if (available !== undefined) {
             query = query.where("available", "==", available);
+        }
+
+        // --- Critical Fix for "Requires Index" Error ---
+        // If we have ANY inequality filter (range, etc) or multiple equality filters, 
+        // Firestore requires a composite index to sort by a different field (createdAt).
+        // Since we don't want to force creating 10+ indexes for every combination,
+        // we will SKIP database sorting if we are filtering, and sort in memory.
+
+        const isFiltering = !!(categoryId || subcategoryId || available !== undefined);
+        let snapshot;
+
+        if (isFiltering) {
             // specific optimization: no orderBy to avoid index requirement
+            // We fetch slightly more if needed to ensure we get enough recent items, 
+            // but ideally limitCount applies to the filtered set.
             snapshot = await query.limit(limitCount).get();
         } else {
-            // default behavior: sort by createdAt
+            // default behavior: sort by createdAt when NO filters are active
             let orderedQuery = query.orderBy("createdAt", "desc");
 
             if (startAfterId) {
@@ -558,8 +571,9 @@ export const getProducts = cache(async function getProducts(
             updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
         })) as Product[];
 
-        // In-memory sort if needed (i.e. if we didn't search with orderBy)
-        if (available !== undefined) {
+        // In-memory sort always if we didn't sort in DB (or even if we did, to be safe for combined results)
+        // But mainly if isFiltering is true.
+        if (isFiltering) {
             products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         }
 
@@ -583,18 +597,25 @@ export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
     subcategoryId?: string,
-    includeUnavailable: boolean = false
+    available?: boolean // Changed from includeUnavailable to available
 ): Promise<Product[]> {
     // For admin/global search, we want to fetch a larger batch to find items
-    const allProducts = await getProducts(undefined, undefined, 1000);
+    // Using 2000 to be safe, filtering in memory is fast
+    const allProducts = await getProducts(undefined, undefined, 2000);
 
     const searchLower = searchQuery.toLowerCase().trim();
 
-    // Filter to available products first (unless includeUnavailable is true)
-    let filtered = includeUnavailable ? allProducts : allProducts.filter(p => p.available);
+    // 1. Filter by Availability
+    // If available is true -> ensure p.available is true
+    // If available is false -> ensure p.available is false
+    // If available is undefined -> allow all
+    let filtered = allProducts;
 
+    if (available !== undefined) {
+        filtered = filtered.filter(p => p.available === available);
+    }
 
-    // Text search filter
+    // 2. Text search filter
     if (searchLower) {
         filtered = filtered.filter(p =>
             p.name.toLowerCase().includes(searchLower) ||
@@ -603,16 +624,11 @@ export async function searchProducts(
         );
     }
 
-    // Category filter
-    if (categoryId) {
-        filtered = filtered.filter(p =>
-            p.categoryId === categoryId || p.subcategoryId === categoryId
-        );
-    }
-
-    // Subcategory filter
+    // 3. Category Filter
     if (subcategoryId) {
         filtered = filtered.filter(p => p.subcategoryId === subcategoryId);
+    } else if (categoryId) {
+        filtered = filtered.filter(p => p.categoryId === categoryId);
     }
 
     return filtered;
