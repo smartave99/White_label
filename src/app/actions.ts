@@ -527,36 +527,61 @@ export const getProducts = cache(async function getProducts(
         if (categoryId) {
             query = query.where("categoryId", "==", categoryId);
         }
-        // Note: Firestore requires an index for combining equality operators (==) with range/order operators (orderBy/limit)
-        // creating the index is a manual step in Firebase console usually.
-        // If 'available' is used effectively as a filter, we might need a composite index.
+
         if (available !== undefined) {
             query = query.where("available", "==", available);
         }
 
-        query = query.orderBy("createdAt", "desc");
+        // Try executing with orderBy first
+        try {
+            let orderedQuery = query.orderBy("createdAt", "desc");
 
-        if (startAfterId) {
-            const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
-            if (startAfterDoc.exists) {
-                query = query.startAfter(startAfterDoc);
+            if (startAfterId) {
+                const startAfterDoc = await getAdminDb().collection("products").doc(startAfterId).get();
+                if (startAfterDoc.exists) {
+                    orderedQuery = orderedQuery.startAfter(startAfterDoc);
+                }
             }
+
+            const snapshot = await orderedQuery.limit(limitCount).get();
+            const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+                updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+            })) as Product[];
+
+            // Cache if this was a cacheable query
+            if (canUseCache) {
+                cache.set(CacheKeys.allProducts(), products);
+            }
+
+            return products;
+        } catch (error: any) {
+            // Check for missing index error
+            if (error.code === 9 || error.message?.includes("index")) {
+                console.warn("Missing Firestore index for query. Falling back to in-memory sorting.", error.message);
+
+                // Fallback: Execute query WITHOUT orderBy, then sort in memory
+                // Note: We can't easily do pagination with startAfter in this fallback without fetching everything
+                // so for now, if index is missing, we might lose strict pagination correctness or performance
+                // but at least it won't crash.
+                const snapshot = await query.limit(limitCount).get();
+
+                const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
+                    updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
+                })) as Product[];
+
+                // Sort in-memory
+                products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+                return products;
+            }
+            throw error; // Re-throw other errors
         }
-
-        const snapshot = await query.limit(limitCount).get();
-        const products = snapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: (doc.data().createdAt as admin.firestore.Timestamp)?.toDate() || new Date(),
-            updatedAt: (doc.data().updatedAt as admin.firestore.Timestamp)?.toDate() || undefined,
-        })) as Product[];
-
-        // Cache if this was a cacheable query
-        if (canUseCache) {
-            cache.set(CacheKeys.allProducts(), products);
-        }
-
-        return products;
     } catch (error) {
         console.error("Error fetching products:", error);
         return [];
@@ -571,15 +596,18 @@ export async function searchProducts(
     searchQuery: string,
     categoryId?: string,
     subcategoryId?: string,
-    includeUnavailable: boolean = false
+    available?: boolean
 ): Promise<Product[]> {
     // For admin/global search, we want to fetch a larger batch to find items
     const allProducts = await getProducts(undefined, undefined, 1000);
 
     const searchLower = searchQuery.toLowerCase().trim();
 
-    // Filter to available products first (unless includeUnavailable is true)
-    let filtered = includeUnavailable ? allProducts : allProducts.filter(p => p.available);
+    // Filter by availability if specified
+    let filtered = allProducts;
+    if (available !== undefined) {
+        filtered = filtered.filter(p => p.available === available);
+    }
 
 
     // Text search filter
