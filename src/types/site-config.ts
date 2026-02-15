@@ -112,6 +112,7 @@ export interface SiteConfig {
         whatsappUrl?: string;
         storeHours: string;
     };
+    headerLinks?: FooterLink[];
 }
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
