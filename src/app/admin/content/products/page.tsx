@@ -73,13 +73,13 @@ export default function ProductsManager() {
 
     // Dynamic filtering logic
     const filteredProducts = React.useMemo(() => {
-        return products.filter(product => {
+        return products.filter((product: Product) => {
             const searchLower = searchQuery.toLowerCase().trim();
             if (!searchLower) return true;
 
             const nameMatch = product.name.toLowerCase().includes(searchLower);
             const descMatch = product.description?.toLowerCase().includes(searchLower);
-            const tagMatch = product.tags?.some(tag => tag.toLowerCase().includes(searchLower));
+            const tagMatch = product.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower));
 
             return nameMatch || descMatch || tagMatch;
         });
@@ -157,7 +157,7 @@ export default function ProductsManager() {
 
         if (filterCategory) {
             // Check if it's a subcategory (has parentId)
-            const cat = categories.find(c => c.id === filterCategory);
+            const cat = categories.find((c: Category) => c.id === filterCategory);
             if (cat?.parentId) {
                 subcategoryId = filterCategory;
             } else {
@@ -183,7 +183,7 @@ export default function ProductsManager() {
         }
 
         if (isLoadMore) {
-            setProducts(prev => [...prev, ...data]);
+            setProducts((prev: Product[]) => [...prev, ...data]);
         } else {
             setProducts(data);
         }
@@ -226,8 +226,8 @@ export default function ProductsManager() {
 
 
     const removeImage = (indexToRemove: number) => {
-        setFormData(prev => {
-            const updatedImages = prev.images.filter((_, index) => index !== indexToRemove);
+        setFormData((prev: typeof formData) => {
+            const updatedImages = prev.images.filter((_: string, index: number) => index !== indexToRemove);
             return {
                 ...prev,
                 images: updatedImages,
@@ -238,7 +238,7 @@ export default function ProductsManager() {
 
     const addImageUrl = (url: string) => {
         if (!url) return;
-        setFormData(prev => {
+        setFormData((prev: typeof formData) => {
             const updatedImages = [...prev.images, url];
             return {
                 ...prev,
@@ -265,9 +265,9 @@ export default function ProductsManager() {
             available: formData.available,
             featured: formData.featured,
             offerId: formData.offerId || undefined,
-            tags: formData.tags.split(",").map(t => t.trim()).filter(Boolean),
-            highlights: formData.highlights.split("\n").map(h => h.trim()).filter(Boolean),
-            specifications: formData.specifications.filter(s => s.key.trim() && s.value.trim())
+            tags: formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean),
+            highlights: formData.highlights.split("\n").map((h: string) => h.trim()).filter(Boolean),
+            specifications: formData.specifications.filter((s: { key: string; value: string }) => s.key.trim() && s.value.trim())
         };
 
         let result;
@@ -330,7 +330,7 @@ export default function ProductsManager() {
         if (selectedIds.size === filteredProducts.length) {
             setSelectedIds(new Set());
         } else {
-            setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+            setSelectedIds(new Set(filteredProducts.map((p: Product) => p.id)));
         }
     };
 
@@ -350,7 +350,7 @@ export default function ProductsManager() {
         if (selectedIds.size === 0) return;
         setBulkActionLoading(true);
         // Optimistic update
-        setProducts(prev => prev.map(p =>
+        setProducts((prev: Product[]) => prev.map((p: Product) =>
             selectedIds.has(p.id) ? { ...p, available } : p
         ));
         const res = await bulkUpdateProducts(Array.from(selectedIds), { available });
@@ -366,7 +366,7 @@ export default function ProductsManager() {
         if (selectedIds.size === 0) return;
         setBulkActionLoading(true);
         // Optimistic update
-        setProducts(prev => prev.map(p =>
+        setProducts((prev: Product[]) => prev.map((p: Product) =>
             selectedIds.has(p.id) ? { ...p, featured } : p
         ));
         const res = await bulkUpdateProducts(Array.from(selectedIds), { featured });
@@ -384,7 +384,7 @@ export default function ProductsManager() {
         if (!confirm(`Move ${selectedIds.size} products to category "${catName}"?`)) return;
         setBulkActionLoading(true);
         // Optimistic update
-        setProducts(prev => prev.map(p =>
+        setProducts((prev: Product[]) => prev.map((p: Product) =>
             selectedIds.has(p.id) ? { ...p, categoryId } : p
         ));
         const res = await bulkUpdateProducts(Array.from(selectedIds), { categoryId });
@@ -399,7 +399,7 @@ export default function ProductsManager() {
 
     const handleToggleAvailability = async (id: string, current: boolean) => {
         // Optimistic update
-        setProducts(prev => prev.map(p =>
+        setProducts((prev: Product[]) => prev.map((p: Product) =>
             p.id === id ? { ...p, available: !current } : p
         ));
 
@@ -409,7 +409,7 @@ export default function ProductsManager() {
         // Revert if failed
         if (!res.success) {
             alert("Failed to update availability");
-            setProducts(prev => prev.map(p =>
+            setProducts((prev: Product[]) => prev.map((p: Product) =>
                 p.id === id ? { ...p, available: current } : p
             ));
         } else {
@@ -418,10 +418,10 @@ export default function ProductsManager() {
         }
     };
 
-    const mainCategories = categories.filter(c => !c.parentId);
-    const getSubcategories = (parentId: string) => categories.filter(c => c.parentId === parentId);
-    const getCategoryName = (id: string) => categories.find(c => c.id === id)?.name || "Unknown";
-    const getOfferName = (id: string) => offers.find(o => o.id === id);
+    const mainCategories = categories.filter((c: Category) => !c.parentId);
+    const getSubcategories = (parentId: string) => categories.filter((c: Category) => c.parentId === parentId);
+    const getCategoryName = (id: string) => categories.find((c: Category) => c.id === id)?.name || "Unknown";
+    const getOfferName = (id: string) => offers.find((o: Offer) => o.id === id);
 
     const handleExport = async () => {
         try {
