@@ -829,7 +829,7 @@ export async function addReview(productId: string, userId: string, userName: str
         const reviewRef = db.collection("reviews").doc();
         const productRef = db.collection("products").doc(productId);
 
-        await db.runTransaction(async (t) => {
+        await db.runTransaction(async (t: admin.firestore.Transaction) => {
             const productDoc = await t.get(productRef);
             if (!productDoc.exists) {
                 throw new Error("Product not found");
@@ -917,7 +917,7 @@ export async function deleteReview(reviewId: string, productId: string, rating: 
         const reviewRef = db.collection("reviews").doc(reviewId);
         const productRef = db.collection("products").doc(productId);
 
-        await db.runTransaction(async (t) => {
+        await db.runTransaction(async (t: admin.firestore.Transaction) => {
             const productDoc = await t.get(productRef);
             if (!productDoc.exists) {
                 throw new Error("Product not found");
