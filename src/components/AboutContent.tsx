@@ -163,7 +163,7 @@ export default function AboutContent({ content, contact }: { content: AboutPageC
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {data.values.map((item, index) => {
+                        {data.values.map((item: { title: string; desc: string; icon: string; color?: string }, index: number) => {
                             const IconComponent = iconMap[item.icon] || Award;
                             return (
                                 <motion.div

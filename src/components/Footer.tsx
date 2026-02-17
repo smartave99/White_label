@@ -40,7 +40,7 @@ export default function Footer() {
                             {footer.navigation.shop.title}
                         </h3>
                         <ul className="space-y-3">
-                            {footer.navigation.shop.links.map((link, idx) => (
+                            {footer.navigation.shop.links.map((link: { name: string; href: string }, idx: number) => (
                                 <li key={idx}>
                                     <Link href={link.href} className="text-slate-400 hover:text-white hover:translate-x-1 transition-all duration-300 block text-sm">
                                         {link.name}
@@ -56,7 +56,7 @@ export default function Footer() {
                             {footer.navigation.company.title}
                         </h3>
                         <ul className="space-y-3">
-                            {footer.navigation.company.links.map((link, idx) => (
+                            {footer.navigation.company.links.map((link: { name: string; href: string }, idx: number) => (
                                 <li key={idx}>
                                     <Link href={link.href} className="text-slate-400 hover:text-white hover:translate-x-1 transition-all duration-300 block text-sm">
                                         {link.name}
@@ -72,7 +72,7 @@ export default function Footer() {
                             <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Join the Movement"}</h3>
                             <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Get the latest collections and exclusive offers sent to your inbox."}</p>
 
-                            <form className="relative max-w-md group" onSubmit={(e) => e.preventDefault()}>
+                            <form className="relative max-w-md group" onSubmit={(e: React.FormEvent) => e.preventDefault()}>
                                 <input
                                     type="email"
                                     placeholder={config.labels?.placeholders?.email || "Enter your email address"}
@@ -116,7 +116,7 @@ export default function Footer() {
                             { Icon: Facebook, url: footer.socialLinks.facebook !== "#" ? footer.socialLinks.facebook : (contact?.facebookUrl || "#") },
                             { Icon: Instagram, url: footer.socialLinks.instagram !== "#" ? footer.socialLinks.instagram : (branding?.instagramUrl || "#") },
                             { Icon: Twitter, url: footer.socialLinks.twitter !== "#" ? footer.socialLinks.twitter : (contact?.twitterUrl || "#") },
-                        ].map(({ Icon, url }, i) => (
+                        ].map(({ Icon, url }: { Icon: any; url: string }, i: number) => (
                             <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                                 className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-brand-dark hover:border-white transition-all duration-300 group">
                                 <Icon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
@@ -133,7 +133,7 @@ export default function Footer() {
                             `© ${new Date().getFullYear()} ${branding.siteName}. All rights reserved.`}
                     </p>
                     <div className="flex gap-6">
-                        {footer.bottomLinks.map((link, idx) => (
+                        {footer.bottomLinks.map((link: { name: string; href: string }, idx: number) => (
                             <Link key={idx} href={link.href === "/sitemap" ? "/site-map" : link.href} className="hover:text-brand-lime transition-colors">
                                 {link.name}
                             </Link>

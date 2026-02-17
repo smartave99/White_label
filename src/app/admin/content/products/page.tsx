@@ -534,7 +534,7 @@ export default function ProductsManager() {
                                 type="text"
                                 placeholder="Search products by name or tag..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
                         </div>
@@ -542,14 +542,14 @@ export default function ProductsManager() {
                             <Filter className="w-5 h-5 text-gray-400" />
                             <select
                                 value={filterCategory}
-                                onChange={(e) => setFilterCategory(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterCategory(e.target.value)}
                                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                             >
                                 <option value="">All Categories</option>
-                                {mainCategories.map(cat => (
+                                {mainCategories.map((cat: Category) => (
                                     <optgroup key={cat.id} label={cat.name}>
                                         <option value={cat.id}>{cat.name}</option>
-                                        {getSubcategories(cat.id).map(sub => (
+                                        {getSubcategories(cat.id).map((sub: Category) => (
                                             <option key={sub.id} value={sub.id}>  └ {sub.name}</option>
                                         ))}
                                     </optgroup>
@@ -557,7 +557,7 @@ export default function ProductsManager() {
                             </select>
                             <select
                                 value={filterAvailable}
-                                onChange={(e) => setFilterAvailable(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterAvailable(e.target.value)}
                                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                             >
                                 <option value="">All Status</option>
@@ -594,7 +594,7 @@ export default function ProductsManager() {
                                     <input
                                         type="text"
                                         value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="Premium Cotton Towel Set"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         required
@@ -626,7 +626,7 @@ export default function ProductsManager() {
                                                 type="url"
                                                 placeholder="Or paste image URL here..."
                                                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-amber-500"
-                                                onKeyDown={(e) => {
+                                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
                                                         addImageUrl(e.currentTarget.value);
@@ -654,7 +654,7 @@ export default function ProductsManager() {
                                                 type="url"
                                                 placeholder="Or paste video URL here..."
                                                 value={formData.videoUrl || ""}
-                                                onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value || null })}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, videoUrl: e.target.value || null })}
                                                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-amber-500"
                                             />
                                             {formData.videoUrl && (
@@ -675,7 +675,7 @@ export default function ProductsManager() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                 <textarea
                                     value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
                                     rows={3}
                                     placeholder="Product description..."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
@@ -688,7 +688,7 @@ export default function ProductsManager() {
                                     <input
                                         type="number"
                                         value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: e.target.value })}
                                         placeholder="499"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         required
@@ -699,7 +699,7 @@ export default function ProductsManager() {
                                     <input
                                         type="number"
                                         value={formData.originalPrice}
-                                        onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, originalPrice: e.target.value })}
                                         placeholder="699 (for showing discount)"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
@@ -708,12 +708,12 @@ export default function ProductsManager() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
                                     <select
                                         value={formData.categoryId}
-                                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, subcategoryId: "" })}
+                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, categoryId: e.target.value, subcategoryId: "" })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         required
                                     >
                                         <option value="">Select Category</option>
-                                        {mainCategories.map(cat => (
+                                        {mainCategories.map((cat: Category) => (
                                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                                         ))}
                                     </select>
@@ -726,11 +726,11 @@ export default function ProductsManager() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
                                         <select
                                             value={formData.subcategoryId}
-                                            onChange={(e) => setFormData({ ...formData, subcategoryId: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, subcategoryId: e.target.value })}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                         >
                                             <option value="">None</option>
-                                            {getSubcategories(formData.categoryId).map(sub => (
+                                            {getSubcategories(formData.categoryId).map((sub: Category) => (
                                                 <option key={sub.id} value={sub.id}>{sub.name}</option>
                                             ))}
                                         </select>
@@ -740,11 +740,11 @@ export default function ProductsManager() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Link to Offer</label>
                                     <select
                                         value={formData.offerId}
-                                        onChange={(e) => setFormData({ ...formData, offerId: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, offerId: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     >
                                         <option value="">No Offer</option>
-                                        {offers.map(offer => (
+                                        {offers.map((offer: Offer) => (
                                             <option key={offer.id} value={offer.id}>{offer.title} ({offer.discount})</option>
                                         ))}
                                     </select>
@@ -754,7 +754,7 @@ export default function ProductsManager() {
                                     <input
                                         type="text"
                                         value={formData.tags}
-                                        onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, tags: e.target.value })}
                                         placeholder="new, bestseller, premium"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                                     />
@@ -766,7 +766,7 @@ export default function ProductsManager() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Highlights (One per line)</label>
                                 <textarea
                                     value={formData.highlights}
-                                    onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, highlights: e.target.value })}
                                     rows={4}
                                     placeholder="• Premium quality material&#10;• 5-year warranty&#10;• Easy installation"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 font-mono text-sm"
@@ -783,7 +783,7 @@ export default function ProductsManager() {
                                                 type="text"
                                                 placeholder="Key (e.g. Material)"
                                                 value={spec.key}
-                                                onChange={(e) => {
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                                     const newSpecs = [...formData.specifications];
                                                     newSpecs[index].key = e.target.value;
                                                     setFormData({ ...formData, specifications: newSpecs });
@@ -794,7 +794,7 @@ export default function ProductsManager() {
                                                 type="text"
                                                 placeholder="Value (e.g. 100% Cotton)"
                                                 value={spec.value}
-                                                onChange={(e) => {
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                                     const newSpecs = [...formData.specifications];
                                                     newSpecs[index].value = e.target.value;
                                                     setFormData({ ...formData, specifications: newSpecs });
@@ -828,7 +828,7 @@ export default function ProductsManager() {
                                     <input
                                         type="checkbox"
                                         checked={formData.available}
-                                        onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, available: e.target.checked })}
                                         className="w-4 h-4 text-amber-500 focus:ring-amber-500 rounded"
                                     />
                                     <span className="text-sm text-gray-700">Available for sale</span>
@@ -837,7 +837,7 @@ export default function ProductsManager() {
                                     <input
                                         type="checkbox"
                                         checked={formData.featured}
-                                        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, featured: e.target.checked })}
                                         className="w-4 h-4 text-amber-500 focus:ring-amber-500 rounded"
                                     />
                                     <span className="text-sm text-gray-700">Featured product</span>
@@ -943,7 +943,7 @@ export default function ProductsManager() {
                                                                 fill
                                                                 className="object-cover"
                                                                 unoptimized
-                                                                onError={(e) => {
+                                                                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                                                                     const target = e.target as HTMLImageElement;
                                                                     target.style.display = 'none';
                                                                 }}

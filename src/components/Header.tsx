@@ -77,7 +77,7 @@ export default function Header() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-1 bg-white/5 backdrop-blur-sm px-2 py-1.5 rounded-full border border-white/10 shadow-sm">
-                    {NAV_LINKS.map((link) => {
+                    {NAV_LINKS.map((link: { label: string; href: string }) => {
                         const isActive = pathname === link.href;
                         return (
                             <Link
@@ -119,7 +119,7 @@ export default function Header() {
                                         ref={searchInputRef}
                                         type="text"
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                                         placeholder={config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collection..."}
                                         className="w-full bg-slate-100/50 border border-slate-200 text-slate-800 text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
                                         onBlur={() => !searchQuery && setIsSearchOpen(false)}
@@ -184,7 +184,7 @@ export default function Header() {
                                     placeholder={config.labels?.placeholders?.search || config.branding.searchPlaceholder || "Search collections..."}
                                     autoFocus
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                                     className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
                                 />
                                 <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue font-semibold">
@@ -207,7 +207,7 @@ export default function Header() {
                         className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-2xl z-[60] md:hidden flex flex-col pt-24"
                     >
                         <div className="px-6 space-y-2">
-                            {NAV_LINKS.map((link) => (
+                            {NAV_LINKS.map((link: { label: string; href: string }) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
