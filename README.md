@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# White Label E-Commerce Platform
+
+This is a modern, fully configurable white-label e-commerce solution built with [Next.js](https://nextjs.org). It is designed to be easily rebranded and deployed for various retail clients without changing the core codebase.
 
 ## Getting Started
 
@@ -16,34 +18,41 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The platform is driven by a centralized configuration system (`src/types/site-config.ts`), which allows you to customize the branding, theme, and features.
 
-## Learn More
+### 1. Environment Variables
+Basic branding can be set via `.env.local`:
+```bash
+NEXT_PUBLIC_BRAND_NAME="Your Brand"
+NEXT_PUBLIC_BRAND_LOGO="/logo.png"
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Firestore Configuration
+For deep customization, the system loads configuration from the `site_config` collection in Firebase Firestore. This overrides environment variables and allows for runtime updates without redeployment.
+- **Collection**: `site_config`
+- **Document**: `main`
 
 ## Features
 
 ### AI Shopping Assistant
-Smart Avenue includes an intelligent AI assistant that helps users find products and handles requests for out-of-stock items.
--   [AI Product Request System Documentation](docs/ai-product-requests.md)
+Includes an intelligent AI assistant that helps users find products.
+- Configurable AI providers (Google Gemini, OpenAI, Anthropic) via the Admin Panel.
+
+### Admin Dashboard
+Comprehensive admin panel (located at `/admin`) for managing:
+- Products, Categories, and Offers
+- AI settings and API keys
+- Site Content and Branding
 
 ### Automated Tracking System
-The codebase includes an automated system for tracking development progress and generating reports.
+The codebase includes an automated system for tracking development progress.
 - **Start a task**: `npm run track init <task-id>`
 - **Log work**: `npm run track log "message"`
 - **Finish task**: `npm run track stop`
-- **Documentation**: [Tracking System Design](docs/tracking_system/README.md)
+
+## Deployment
+
+The easiest way to deploy is using the [Vercel Platform](https://vercel.com). Ensure all environment variables found in `.env.example` are configured in your deployment project.

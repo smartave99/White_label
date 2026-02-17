@@ -116,7 +116,7 @@ export default function Footer() {
                             { Icon: Facebook, url: footer.socialLinks.facebook !== "#" ? footer.socialLinks.facebook : (contact?.facebookUrl || "#") },
                             { Icon: Instagram, url: footer.socialLinks.instagram !== "#" ? footer.socialLinks.instagram : (branding?.instagramUrl || "#") },
                             { Icon: Twitter, url: footer.socialLinks.twitter !== "#" ? footer.socialLinks.twitter : (contact?.twitterUrl || "#") },
-                        ].map(({ Icon, url }: { Icon: any; url: string }, i: number) => (
+                        ].map(({ Icon, url }: { Icon: React.ElementType; url: string }, i: number) => (
                             <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                                 className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-brand-dark hover:border-white transition-all duration-300 group">
                                 <Icon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
