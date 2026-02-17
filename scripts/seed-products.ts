@@ -1,9 +1,11 @@
 import path from 'path';
 import dotenv from 'dotenv';
+import * as admin from 'firebase-admin';
+
+// Load env vars
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { getAdminDb } from '../src/lib/firebase-admin';
-import { createProduct, createCategory, Product } from '../src/app/actions';
 
 // Mock data
 const categories = [
@@ -50,7 +52,7 @@ const products = [
         categorySlug: "fashion",
         tags: ["clothing", "dress", "summer", "women"],
         available: true,
-        featured: false,
+        featured: true,
         imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
     },
     {
@@ -97,67 +99,73 @@ const products = [
 
 async function seed() {
     console.log("Seeding database...");
+    console.log("Env Project ID:", process.env.FIREBASE_PROJECT_ID ? "Found" : "Missing");
+    console.log("Env Client Email:", process.env.FIREBASE_CLIENT_EMAIL ? "Found" : "Missing");
+    console.log("Env Private Key:", process.env.FIREBASE_PRIVATE_KEY ? "Found" : "Missing");
 
-    // Clear existing data? Maybe not for now, just append/check.
-    // Ideally we should check if data exists but for simplicity let's just create if not exists or duplicate (for dev).
-    // Actually, let's just create them.
-
+    const db = getAdminDb();
     const categoryMap = new Map<string, string>(); // slug -> id
 
     // 1. Create Categories
     console.log("Creating categories...");
     for (const cat of categories) {
-        // Check if exists
-        const snapshot = await getAdminDb().collection("categories").where("slug", "==", cat.slug).get();
-        let catId = "";
+        try {
+            const snapshot = await db.collection("categories").where("slug", "==", cat.slug).get();
+            let catId = "";
 
-        if (!snapshot.empty) {
-            console.log(`Category ${cat.name} already exists.`);
-            catId = snapshot.docs[0].id;
-        } else {
-            const res = await createCategory(cat.name, cat.parentId);
-            if (res.success && res.id) {
-                catId = res.id;
-                console.log(`Created category ${cat.name}`);
+            if (!snapshot.empty) {
+                console.log(`Category ${cat.name} already exists.`);
+                catId = snapshot.docs[0].id;
             } else {
-                console.error(`Failed to create category ${cat.name}:`, res.error);
+                const docRef = await db.collection("categories").add({
+                    name: cat.name,
+                    slug: cat.slug,
+                    parentId: cat.parentId,
+                    order: categories.indexOf(cat),
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+                catId = docRef.id;
+                console.log(`Created category ${cat.name}`);
             }
-        }
 
-        if (catId) {
-            categoryMap.set(cat.slug, catId);
+            if (catId) {
+                categoryMap.set(cat.slug, catId);
+            }
+        } catch (error) {
+            console.error(`Failed to process category ${cat.name}:`, error);
         }
     }
 
     // 2. Create Products
     console.log("Creating products...");
     for (const p of products) {
-        const catId = categoryMap.get(p.categorySlug);
-        if (!catId) {
-            console.warn(`Category not found for product ${p.name}, skipping.`);
-            continue;
-        }
+        try {
+            const catId = categoryMap.get(p.categorySlug);
+            if (!catId) {
+                console.warn(`Category not found for product ${p.name}, skipping.`);
+                continue;
+            }
 
-        const productData = {
-            name: p.name,
-            description: p.description,
-            price: p.price,
-            categoryId: catId,
-            imageUrl: p.imageUrl,
-            images: [p.imageUrl],
-            available: p.available,
-            featured: p.featured,
-            tags: p.tags,
-            // default empty/null for others
-            videoUrl: "",
-            subcategoryId: null,
-        };
+            const productData = {
+                name: p.name,
+                description: p.description,
+                price: p.price,
+                categoryId: catId,
+                imageUrl: p.imageUrl,
+                images: [p.imageUrl],
+                available: p.available,
+                featured: p.featured,
+                tags: p.tags,
+                videoUrl: "",
+                subcategoryId: undefined,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            };
 
-        const res = await createProduct(productData as Partial<Product>);
-        if (res.success) {
+            const docRef = await db.collection("products").add(productData);
             console.log(`Created product ${p.name}`);
-        } else {
-            console.error(`Failed to create product ${p.name}:`, res.error);
+        } catch (error) {
+            console.error(`Failed to create product ${p.name}:`, error);
         }
     }
 
