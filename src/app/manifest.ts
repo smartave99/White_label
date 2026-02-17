@@ -7,9 +7,9 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     const manifest = config.manifest;
 
     return {
-        name: manifest.name || 'Smart Avenue 99',
-        short_name: manifest.shortName || 'Smart Avenue 99',
-        description: manifest.description || 'Smart Avenue 99 is a one-stop departmental store.',
+        name: manifest.name || process.env.NEXT_PUBLIC_BRAND_NAME || 'Smart Avenue 99',
+        short_name: manifest.shortName || process.env.NEXT_PUBLIC_BRAND_NAME || 'Smart Avenue 99',
+        description: manifest.description || `${process.env.NEXT_PUBLIC_BRAND_NAME || 'Smart Avenue 99'} is a one-stop departmental store.`,
         start_url: manifest.startUrl || '/',
         display: manifest.display || 'standalone',
         background_color: manifest.backgroundColor || '#ffffff',

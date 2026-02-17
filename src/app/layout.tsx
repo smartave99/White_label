@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { branding, system } = config;
 
   return {
-    metadataBase: new URL("https://smartavenue99.com"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com"),
     title: {
       default: branding.siteName || "Smart Avenue 99",
       template: `%s | ${branding.siteName || "Smart Avenue 99"}`,
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: "https://smartavenue99.com",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com",
       title: branding.siteName,
       description: branding.tagline,
       siteName: branding.siteName,

@@ -26,7 +26,7 @@ interface CloudinaryUploadProps {
 
 export default function CloudinaryUpload({
     onUpload,
-    folder = "products",
+    folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER || "products",
     multiple = false,
     maxFiles = 100, // Effectively unlimited
     className = "",

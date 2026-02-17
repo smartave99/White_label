@@ -5,6 +5,8 @@
  */
 
 import { getAPIKeyManager } from "./api-key-manager";
+import { getAdminDb } from "@/lib/firebase-admin"; // Ensure admin access if needed
+import { getSiteConfig } from "@/app/actions/site-config";
 import {
     LLMIntentResponse,
     LLMServiceError,
@@ -283,13 +285,14 @@ export async function analyzeIntent(
     messages: Array<{ role: string; content: string }> = [],
     provider: LLMProvider = "google"
 ): Promise<LLMIntentResponse> {
+    const config = await getSiteConfig();
     const categoryList = categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n");
 
     const history = messages.length > 0
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
-    const prompt = `You are a product recommendation assistant for a retail store called "Smart Avenue" in India.
+    const prompt = `You are a product recommendation assistant for a retail store called "${config.branding.siteName}".
 
 ${history}Analyze the following customer query and extract their intent.
 
@@ -306,8 +309,8 @@ Respond with a JSON object (and nothing else) in this exact format:
   "category": "category ID from the list above, or null if unclear",
   "subcategory": "subcategory ID if applicable, or null",
   "requirements": ["list of specific requirements extracted from the query"],
-  "budgetMin": null or number in INR,
-  "budgetMax": null or number in INR (e.g., if they say "under 500", set this to 500),
+  "budgetMin": null or number,
+  "budgetMax": null or number (e.g., if they say "under 500", set this to 500),
   "preferences": ["any stated preferences like 'premium', 'simple', 'colorful', etc."],
   "useCase": "brief description of what they want to use the product for",
   "confidence": 0.0 to 1.0 indicating how confident you are in understanding their intent,
@@ -335,6 +338,8 @@ export async function rankProducts(
         return [];
     }
 
+    const config = await getSiteConfig();
+
     const productList = products.map(p => ({
         id: p.id,
         name: p.name,
@@ -343,7 +348,7 @@ export async function rankProducts(
         tags: p.tags,
     }));
 
-    const prompt = `You are a product recommendation assistant for Smart Avenue retail store.
+    const prompt = `You are a product recommendation assistant for ${config.branding.siteName} retail store.
 
 Customer query: "${query}"
 
@@ -351,7 +356,7 @@ Intent analysis:
 - Use case: ${intent.useCase}
 - Requirements: ${intent.requirements.join(", ") || "none specified"}
 - Preferences: ${intent.preferences.join(", ") || "none specified"}
-- Budget: ${intent.budgetMin ? `₹${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `₹${intent.budgetMax}` : "any"}
+- Budget: ${intent.budgetMin ? `${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `${intent.budgetMax}` : "any"}
 
 Available products:
 ${JSON.stringify(productList, null, 2)}
@@ -386,7 +391,9 @@ export async function generateSummary(
         return "I couldn't find specific products matching your requirements. Could you provide more details about what you're looking for?";
     }
 
-    const prompt = `You are a friendly product recommendation assistant for Smart Avenue retail store in India.
+    const config = await getSiteConfig();
+
+    const prompt = `You are a friendly product recommendation assistant for ${config.branding.siteName} retail store.
 
 Customer asked: "${query}"
 
@@ -407,15 +414,13 @@ export async function generateNoProductFoundResponse(
     intent: LLMIntentResponse,
     provider: LLMProvider = "google"
 ): Promise<string> {
-    const prompt = `You are an expert sales associate for Smart Avenue, known for being helpful and proactive.
+    const config = await getSiteConfig();
+    const prompt = `You are an expert sales associate for ${config.branding.siteName}, known for being helpful and proactive.
 
 CRITICAL INSTRUCTION:
 - You MUST detect the language of the Customer Query.
 - You MUST reply in the SAME language as the query.
-- If the user asks in Hindi, reply in Hindi.
-- If the user asks in Urdu, reply in Urdu.
-- If the user asks in Hinglish, reply in Hinglish.
-- If the user asks in English, reply in English.
+- Be culturally relevant to the store's location.
 
 Customer query: "${query}"
 
@@ -456,13 +461,14 @@ export async function handleMissingProduct(
         specifications?: string[];
     };
 }> {
+    const config = await getSiteConfig();
     const history = messages.length > 0
         ? `Conversation History:\n${messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}\n\n`
         : "";
 
     const productName = intent.productRequestData?.name || intent.category || intent.subcategory || query;
 
-    const prompt = `You are a helpful sales assistant for Smart Avenue.
+    const prompt = `You are a helpful sales assistant for ${config.branding.siteName}.
     
 ${history}Customer Query: "${query}"
 
@@ -556,6 +562,7 @@ export async function rankAndSummarize(
         };
     }
 
+    const config = await getSiteConfig();
     const productList = products.map(p => ({
         id: p.id,
         name: p.name,
@@ -564,47 +571,43 @@ export async function rankAndSummarize(
         tags: p.tags,
     }));
 
-    const prompt = `You are an expert sales associate for Smart Avenue, known for being the world's best salesperson.
-You are creative, persuasive, and charming.
-
-CRITICAL INSTRUCTION:
-- You MUST detect the language of the Customer Query.
-- You MUST reply in the SAME language as the query.
-- If the user asks in Hindi, reply in Hindi.
-- If the user asks in Urdu, reply in Urdu.
-- If the user asks in Hinglish, reply in Hinglish.
-- If the user asks in English, reply in English.
-- Be culturally relevant to Indian shoppers.
-
-Customer query: "${query}"
-
-Intent analysis:
-- Use case: ${intent.useCase}
-- Requirements: ${intent.requirements.join(", ") || "none specified"}
-- Preferences: ${intent.preferences.join(", ") || "none specified"}
-- Budget: ${intent.budgetMin ? `₹${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `₹${intent.budgetMax}` : "any"}
-
-Available products:
-${JSON.stringify(productList, null, 2)}
-
-Do two things:
-1. Rank the top 3-5 most suitable products for this customer
-3. Write a creative, persuasive, and personalized summary to introduce the recommendations. Speak directly to the customer.
-
-Respond with a JSON object (and nothing else) in this exact format:
-{
-  "rankings": [
+    const prompt = `You are an expert sales associate for ${config.branding.siteName}, known for being the world's best salesperson.
+    You are creative, persuasive, and charming.
+    
+    CRITICAL INSTRUCTION:
+    - You MUST detect the language of the Customer Query.
+    - You MUST reply in the SAME language as the query.
+    - Be culturally relevant to the store's location.
+    
+    Customer query: "${query}"
+    
+    Intent analysis:
+    - Use case: ${intent.useCase}
+    - Requirements: ${intent.requirements.join(", ") || "none specified"}
+    - Preferences: ${intent.preferences.join(", ") || "none specified"}
+    - Budget: ${intent.budgetMin ? `${intent.budgetMin}` : "any"} - ${intent.budgetMax ? `${intent.budgetMax}` : "any"}
+    
+    Available products:
+    ${JSON.stringify(productList, null, 2)}
+    
+    Do two things:
+    1. Rank the top 3-5 most suitable products for this customer
+    2. Write a creative, persuasive, and personalized summary to introduce the recommendations. Speak directly to the customer.
+    
+    Respond with a JSON object (and nothing else) in this exact format:
     {
-      "productId": "the product ID",
-      "matchScore": 0-100 indicating how well it matches,
-      "highlights": ["key features that match their needs"],
-      "whyRecommended": "A persuasive 1-2 sentence pitch for this product"
+      "rankings": [
+        {
+          "productId": "the product ID",
+          "matchScore": 0-100 indicating how well it matches,
+          "highlights": ["key features that match their needs"],
+          "whyRecommended": "A persuasive 1-2 sentence pitch for this product"
+        }
+      ],
+      "summary": "A creative, charming, and persuasive summary for the customer, in their language"
     }
-  ],
-  "summary": "A creative, charming, and persuasive summary for the customer, in their language"
-}
-
-Only include relevant products. If no products match well, return empty rankings.`;
+    
+    Only include relevant products. If no products match well, return empty rankings.`;
 
     return await callLLMForJSON<{
         rankings: Array<{ productId: string; matchScore: number; highlights: string[]; whyRecommended: string }>;

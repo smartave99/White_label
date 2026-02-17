@@ -182,10 +182,10 @@ export interface SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
-        siteName: "Smart Avenue",
-        tagline: "Where Luxury Meets Convenience",
-        logoUrl: "/logo.png",
-        faviconUrl: "/favicon.ico",
+        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "Smart Avenue",
+        tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Where Luxury Meets Convenience",
+        logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.png",
+        faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON || "/favicon.ico",
         posterUrl: "",
         pwaScreenshotUrl: "",
         instagramUrl: "",

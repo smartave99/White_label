@@ -23,6 +23,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
             allow: config.system.maintenanceMode ? "/admin" : "/",
             disallow: config.system.maintenanceMode ? "/" : "/admin/",
         },
-        sitemap: "https://smartavenue99.com/sitemap.xml",
+        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com"}/sitemap.xml`,
     };
 }
