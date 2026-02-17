@@ -67,7 +67,7 @@ export default function Header() {
                     <div className="relative w-40 h-10 transition-transform duration-300 group-hover:scale-105">
                         <Image
                             src={config.branding.logoUrl || "/logo.png"}
-                            alt={config.branding.siteName || "Smart Avenue"}
+                            alt={config.branding.siteName}
                             fill
                             className="object-contain"
                             priority

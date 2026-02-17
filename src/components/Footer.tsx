@@ -130,7 +130,7 @@ export default function Footer() {
                     <p>
                         {config.labels?.messages?.copyright ?
                             config.labels.messages.copyright.replace("{year}", new Date().getFullYear().toString()) :
-                            `© ${new Date().getFullYear()} ${branding.siteName || "Smart Avenue 99"}. All rights reserved.`}
+                            `© ${new Date().getFullYear()} ${branding.siteName}. All rights reserved.`}
                     </p>
                     <div className="flex gap-6">
                         {footer.bottomLinks.map((link, idx) => (

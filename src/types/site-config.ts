@@ -182,7 +182,7 @@ export interface SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
-        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "My Store",
+        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "White Label Store",
         tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Premium Retail Experience",
         logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.png",
         faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON || "/favicon.ico",
