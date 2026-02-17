@@ -184,7 +184,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
         siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "Generic Brand",
         tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Quality Products & Services",
-        logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.png",
+        logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.svg",
         faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON || "/favicon.ico",
         posterUrl: "",
         pwaScreenshotUrl: "",
