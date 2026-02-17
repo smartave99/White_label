@@ -182,8 +182,8 @@ export interface SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
-        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "White Label Store",
-        tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Premium Retail Experience",
+        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "Generic Brand",
+        tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Quality Products & Services",
         logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.png",
         faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON || "/favicon.ico",
         posterUrl: "",
@@ -193,9 +193,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         searchPlaceholder: "Search collections..."
     },
     theme: {
-        primaryColor: "#064e3b", // Deep Emerald Green
-        secondaryColor: "#d4af37", // Rich Gold
-        accentColor: "#10b981", // Emerald 500
+        primaryColor: "#334155", // Slate 700 (Neutral)
+        secondaryColor: "#64748b", // Slate 500 (Neutral)
+        accentColor: "#0ea5e9", // Sky 500 (Generic Blue)
         backgroundColor: "#f8fafc", // Slate 50
         textColor: "#0f172a", // Slate 900
     },
@@ -203,8 +203,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         slides: [
             {
                 id: "default-slide-1",
-                title: "Welcome to Our Store",
-                subtitle: "Discover our premium collection of products curated just for you.",
+                title: "Welcome to Our Platform",
+                subtitle: "Your destination for amazing products and services.",
                 ctaText: "Shop Now",
                 ctaLink: "/products",
                 backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop",
@@ -227,9 +227,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         logoUrl: "",
         tagline: "Your premier destination for quality products and exceptional service.",
         newsletter: {
-            title: "Join Our Newsletter",
-            description: "Get the latest updates and exclusive offers sent to your inbox.",
-            subtext: "No spam, unsubscribe anytime",
+            title: "Stay Updated",
+            description: "Subscribe to receive the latest news and updates.",
+            subtext: "We respect your privacy.",
         },
         socialSectionTitle: "Connect",
         socialLinks: {
@@ -283,9 +283,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         scripts: {},
     },
     manifest: {
-        name: "My Store",
-        shortName: "Store",
-        description: "Experience premium retail at your fingertips.",
+        name: "My App",
+        shortName: "App",
+        description: "A premium digital experience.",
         themeColor: "#064e3b",
         backgroundColor: "#ffffff",
         display: "standalone",
@@ -312,24 +312,22 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         }
     },
     seo: {
-        siteTitle: "My Store – Premium Quality Products",
-        titleTemplate: "%s | My Store",
-        metaDescription: "We offer a wide range of high-quality products for your home and lifestyle. Shop with confidence.",
+        siteTitle: "Generic Brand - Welcome",
+        titleTemplate: "%s | Generic Brand",
+        metaDescription: "Welcome to our platform. Discover our range of products.",
         keywords: [
-            "retail store",
-            "online shopping",
-            "premium products",
-            "home essentials",
-            "lifestyle",
+            "brand",
+            "product",
+            "service",
         ],
         ogImageUrl: "/logo.png",
         twitterHandle: "@mystore",
         googleVerification: "",
         jsonLd: {
-            name: "My Store",
+            name: "Generic Brand",
             url: "https://example.com",
             logo: "/logo.png",
-            description: "One-stop store offering premium essentials.",
+            description: "Your trusted platform.",
             addressCountry: "US",
             priceRange: "$$",
         },

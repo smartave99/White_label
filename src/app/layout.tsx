@@ -26,10 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"),
     title: {
-      default: branding.siteName || "My Store",
-      template: `%s | ${branding.siteName || "My Store"}`,
+      default: branding.siteName || DEFAULT_SITE_CONFIG.branding.siteName,
+      template: `%s | ${branding.siteName || DEFAULT_SITE_CONFIG.branding.siteName}`,
     },
-    description: branding.tagline || "Shop the best products online.",
+    description: branding.tagline || DEFAULT_SITE_CONFIG.branding.tagline,
     icons: {
       icon: branding.faviconUrl || "/favicon.ico",
     },

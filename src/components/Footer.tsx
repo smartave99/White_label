@@ -69,8 +69,8 @@ export default function Footer() {
                     {/* Newsletter & Updates (Spans 5) */}
                     <div className="lg:col-span-5 p-8 lg:p-10 bg-white/5">
                         <div className="h-full flex flex-col justify-center">
-                            <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Join the Movement"}</h3>
-                            <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Get the latest collections and exclusive offers sent to your inbox."}</p>
+                            <h3 className="text-2xl font-bold mb-2">{footer.newsletter?.title || "Stay Updated"}</h3>
+                            <p className="text-slate-400 mb-6 font-light">{footer.newsletter?.description || "Subscribe for the latest updates."}</p>
 
                             <form className="relative max-w-md group" onSubmit={(e: React.FormEvent) => e.preventDefault()}>
                                 <input

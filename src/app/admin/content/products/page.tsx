@@ -21,7 +21,7 @@ import {
     Category,
     Offer
 } from "@/app/actions";
-import * as XLSX from "xlsx";
+import { utils as XLSXUtils, writeFile as XLSXWriteFile } from "xlsx";
 import {
     Loader2,
     ArrowLeft,
@@ -444,9 +444,9 @@ export default function ProductsManager() {
                 "Created At": p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ""
             }));
 
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Products");
+            const ws = XLSXUtils.json_to_sheet(exportData);
+            const wb = XLSXUtils.book_new();
+            XLSXUtils.book_append_sheet(wb, ws, "Products");
 
             // Auto-width columns
             const colWidths = [
@@ -466,7 +466,7 @@ export default function ProductsManager() {
             ];
             ws['!cols'] = colWidths;
 
-            XLSX.writeFile(wb, `products_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+            XLSXWriteFile(wb, `Products_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
         } catch (error) {
             console.error("Export failed:", error);
             alert("Failed to export products. Please try again.");

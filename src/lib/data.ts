@@ -26,27 +26,7 @@ export async function getOffers(): Promise<Offer[]> {
     }
 }
 
-// ==================== TEST CONNECTION ====================
-
-export async function testFirebaseConnection() {
-    try {
-        const snapshot = await getAdminDb().listCollections();
-        console.log("Successfully connected to Firebase!");
-        return {
-            success: true,
-            message: "Connected to Firebase!",
-            collections: snapshot.map((col: admin.firestore.CollectionReference) => col.id)
-        };
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        console.error("Firebase Connection Error:", errorMessage);
-        return {
-            success: false,
-            message: "Failed to connect to Firebase. Check your .env.local file.",
-            error: errorMessage
-        };
-    }
-}
+// ==================== TEST CONNECTION REMOVED ====================
 
 // ==================== SITE CONTENT ====================
 

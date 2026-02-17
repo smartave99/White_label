@@ -10,44 +10,32 @@
   --font-serif: var(--font-outfit);
   /* Using Sans for Serif variable to override any legacy serif usage */
 
-  /* Custom Colors - Modern Tech Retail Palette */
-  --color-brand-blue: #0284c7;
-  /* Sky 600 */
-  --color-brand-lime: #84cc16;
-  /* Lime 500 */
-  --color-brand-green: #064e3b;
-  /* Emerald 900 - Deep Premium Green */
-  --color-brand-gold: #d4af37;
-  /* Classic Gold */
-  --color-brand-sand: #fefae0;
-  /* Soft Sand/Beige */
-  --color-brand-dark: #0f172a;
-  /* Slate 900 */
-  --color-brand-light: #f8fafc;
-  /* Slate 50 */
-  --color-brand-gray: #64748b;
-  /* Slate 500 */
+  /* Custom Colors - Neutral White Label Palette */
+  --color-brand-blue: #0ea5e9; /* Sky 500 - Accent */
+  --color-brand-lime: #0ea5e9; /* Mapped to Sky 500 for neutrality */
+  --color-brand-green: #334155; /* Slate 700 - Primary Brand */
+  --color-brand-gold: #64748b;  /* Mapped to Slate 500 */
+  --color-brand-sand: #f8fafc;  /* Slate 50 */
+  --color-brand-dark: #0f172a;  /* Slate 900 */
+  --color-brand-light: #f8fafc; /* Slate 50 */
+  --color-brand-gray: #64748b;  /* Slate 500 */
 }
 
 :root {
   /* Logo-aligned Palette */
-  --primary: #0284c7;
-  /* Sky 600 - Main Brand Blue */
-  --secondary: #84cc16;
-  /* Lime 500 - Accent/Action */
-  --accent: #06b6d4;
-  /* Cyan 500 */
+  --primary: #334155;   /* Slate 700 */
+  --secondary: #64748b; /* Slate 500 */
+  --accent: #0ea5e9;    /* Sky 500 */
   --background: #ffffff;
   --foreground: #0f172a;
 
-  --brand-blue: #0284c7;
-  --brand-lime: #84cc16;
-  --brand-green: #064e3b;
-  --brand-gold: #d4af37;
+  --brand-blue: #0ea5e9;
+  --brand-lime: #0ea5e9; /* Neutralized */
+  --brand-green: #334155; /* Neutralized */
+  --brand-gold: #64748b; /* Neutralized */
   --brand-dark: #020617;
   /* Slate 950 */
-  --brand-sand: #fefae0;
-  /* Soft Sand/Beige */
+  --brand-sand: #f8fafc;
 
   /* Font Variables matching layout.tsx */
   --font-sans: var(--font-outfit);
