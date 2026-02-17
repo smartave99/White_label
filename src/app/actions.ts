@@ -370,13 +370,7 @@ export async function deleteStaffMember(id: string) {
 // Get staff data (role and permissions) by email
 export async function getStaffData(email: string) {
     try {
-        // Hardcoded super admin
-        if (email === "admin@smartavenue99.com") {
-            return {
-                role: "Admin",
-                permissions: ["*"] // All permissions
-            };
-        }
+
 
         const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
         if (!snapshot.empty) {

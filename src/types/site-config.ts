@@ -182,8 +182,8 @@ export interface SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
     branding: {
-        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "Smart Avenue",
-        tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Where Luxury Meets Convenience",
+        siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "My Store",
+        tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Premium Retail Experience",
         logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO || "/logo.png",
         faviconUrl: process.env.NEXT_PUBLIC_BRAND_FAVICON || "/favicon.ico",
         posterUrl: "",
@@ -203,9 +203,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         slides: [
             {
                 id: "default-slide-1",
-                title: "Experience International Retail",
-                subtitle: "Premium groceries, fashion, and lifestyle products available at our flagship store.",
-                ctaText: "View Collection",
+                title: "Welcome to Our Store",
+                subtitle: "Discover our premium collection of products curated just for you.",
+                ctaText: "Shop Now",
                 ctaLink: "/products",
                 backgroundImageUrl: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop",
                 overlayOpacity: 0.6,
@@ -225,10 +225,10 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     },
     footer: {
         logoUrl: "",
-        tagline: "Patna's premier destination for modern living. Elevating your lifestyle with curated tech, home, and fashion.",
+        tagline: "Your premier destination for quality products and exceptional service.",
         newsletter: {
-            title: "Join the Movement",
-            description: "Get the latest collections and exclusive offers sent to your inbox.",
+            title: "Join Our Newsletter",
+            description: "Get the latest updates and exclusive offers sent to your inbox.",
             subtext: "No spam, unsubscribe anytime",
         },
         socialSectionTitle: "Connect",
@@ -264,9 +264,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         ]
     },
     contact: {
-        phone: "+91 12345 67890",
-        email: "contact@smartavenue.com",
-        address: "Patna, Bihar, India",
+        phone: "+1 234 567 890",
+        email: "contact@example.com",
+        address: "City, State, Country",
         mapEmbedUrl: "",
         storeHours: "Monday - Sunday\n10:00 AM - 10:00 PM",
     },
@@ -279,13 +279,13 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     ],
     system: {
         maintenanceMode: false,
-        robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: https://smartavenue99.com/sitemap.xml",
+        robotsTxt: `User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: ${process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"}/sitemap.xml`,
         scripts: {},
     },
     manifest: {
-        name: "Smart Avenue 99",
-        shortName: "Smart Avenue",
-        description: "Experience International Retail at your fingertips.",
+        name: "My Store",
+        shortName: "Store",
+        description: "Experience premium retail at your fingertips.",
         themeColor: "#064e3b",
         backgroundColor: "#ffffff",
         display: "standalone",
@@ -312,31 +312,26 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
         }
     },
     seo: {
-        siteTitle: "Smart Avenue 99 – All your home needs, simplified.",
-        titleTemplate: "%s | Smart Avenue 99",
-        metaDescription: "We are a one-stop departmental store offering a wide range of home essentials, stylish home décor, premium kitchenware, durable plasticware, quality crockery, cosmetics, premium stationery, soft toys, and thoughtfully curated gift items.",
+        siteTitle: "My Store – Premium Quality Products",
+        titleTemplate: "%s | My Store",
+        metaDescription: "We offer a wide range of high-quality products for your home and lifestyle. Shop with confidence.",
         keywords: [
-            "Smart Avenue 99 retail store",
-            "premium stationery store",
-            "stylish stationery products",
-            "affordable home décor store",
-            "kitchen décor products",
-            "soft toys shop",
-            "home essentials store",
-            "retail store near me",
-            "gift shop",
+            "retail store",
             "online shopping",
+            "premium products",
+            "home essentials",
+            "lifestyle",
         ],
         ogImageUrl: "/logo.png",
-        twitterHandle: "@smartavenue99",
+        twitterHandle: "@mystore",
         googleVerification: "",
         jsonLd: {
-            name: "Smart Avenue 99",
-            url: "https://smartavenue99.com",
+            name: "My Store",
+            url: "https://example.com",
             logo: "/logo.png",
-            description: "One-stop departmental store offering home essentials, decor, kitchenware, and gifts.",
-            addressCountry: "IN",
-            priceRange: "₹₹",
+            description: "One-stop store offering premium essentials.",
+            addressCountry: "US",
+            priceRange: "$$",
         },
     }
 };

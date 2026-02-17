@@ -35,7 +35,7 @@ const AuthContext = createContext<AuthContextType>({
 
 // Persist minimal auth state to localStorage for faster initial render
 // Persist minimal auth state to localStorage for faster initial render
-const AUTH_STORAGE_KEY = "smart_avenue_auth";
+const AUTH_STORAGE_KEY = "whitelabel_auth";
 
 function setPersistedAuth(isLoggedIn: boolean) {
     if (typeof window === "undefined") return;

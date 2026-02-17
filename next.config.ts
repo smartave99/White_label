@@ -14,7 +14,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
     disableDevLogs: true,
     runtimeCaching: [
       {
-        urlPattern: new RegExp(`^${process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com"}/api/.*$`, "i"),
+        urlPattern: new RegExp(`^${process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"}/api/.*$`, "i"),
         handler: "NetworkFirst",
         options: {
           cacheName: "api-cache",

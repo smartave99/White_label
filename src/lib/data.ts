@@ -163,8 +163,7 @@ export async function getStaffMembers(): Promise<StaffMember[]> {
 // Get staff role by email
 export async function getStaffRole(email: string): Promise<string | null> {
     try {
-        // Hardcoded super admin
-        if (email === "admin@smartavenue99.com") return "Admin";
+
 
         const snapshot = await getAdminDb().collection("staff").where("email", "==", email).limit(1).get();
         if (!snapshot.empty) {

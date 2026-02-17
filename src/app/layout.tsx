@@ -24,10 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const { branding, system } = config;
 
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"),
     title: {
-      default: branding.siteName || "Smart Avenue 99",
-      template: `%s | ${branding.siteName || "Smart Avenue 99"}`,
+      default: branding.siteName || "My Store",
+      template: `%s | ${branding.siteName || "My Store"}`,
     },
     description: branding.tagline || "Shop the best products online.",
     icons: {
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: process.env.NEXT_PUBLIC_SITE_URL || "https://smartavenue99.com",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://example.com",
       title: branding.siteName,
       description: branding.tagline,
       siteName: branding.siteName,
@@ -54,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
     other: {
-      ...(system.scripts.googleAnalyticsId ? {} : { "google-site-verification": "P58XCY_8uZe5I7QC5eNh2wivKElDpu2ckaI60IgD5yc" })
+      ...(system.scripts.googleAnalyticsId ? {} : {})
     }
   };
 }
