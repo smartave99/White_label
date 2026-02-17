@@ -1,0 +1,56 @@
+# White-Label Reseller & Deployment Guide
+
+## Overview
+This platform is designed to be easily rebranded and deployed for multiple tenants. This guide explains how to configure branding, set up the environment, and deploy the application.
+
+## 1. Prerequisites
+- **Node.js**: v18 or higher
+- **Firebase Project**: A new project created in the [Firebase Console](https://console.firebase.google.com/)
+- **PackageManager**: `npm` or `pnpm`
+
+## 2. Environment Setup
+The application relies on environment variables for its core identity.
+
+1.  **Duplicate Template**: Copy [.env.template](file:///c:/Users/user/.gemini/antigravity/scratch/White_label/.env.template) to `.env.local` (for local dev) or set these variables in your deployment platform (Vercel/Netlify).
+2.  **Required Variables**:
+
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_BRAND_NAME` | The visible name of the store | "My Awesome Shop" |
+| `NEXT_PUBLIC_BRAND_TAGLINE` | Tagline appearing in Hero/Meta | "Quality goods for you" |
+| `NEXT_PUBLIC_BRAND_LOGO` | Path to logo (relative or absolute URL) | "/images/my-logo.png" |
+| `NEXT_PUBLIC_BRAND_FAVICON`| Path to favicon | "/favicon.ico" |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Config | (From Firebase Console) |
+
+> [!TIP]
+> **Pro Tip**: You do NOT need to touch the code to change the brand name. Just update `NEXT_PUBLIC_BRAND_NAME` and redeploy!
+
+## 3. Configuration Management
+The platform uses a "Tiered Configuration" system:
+1.  **Firestore (Highest Priority)**: Settings stored in the `/config/site` document in Firestore override everything. Use the Admin Panel to change these on the fly without redeploying.
+2.  **Environment Variables (Medium Priority)**: Used if no Firestore config exists (or for static generation).
+3.  **Defaults (Lowest Priority)**: Generic "White Label Store" values hardcoded in [src/types/site-config.ts](file:///c:/Users/user/.gemini/antigravity/scratch/White_label/src/types/site-config.ts).
+
+### Changing Defaults in Code
+If you want to change the *hardcoded fallback* (e.g., if you are reselling this as a specific base product), edit:
+- **File**: [src/types/site-config.ts](file:///c:/Users/user/.gemini/antigravity/scratch/White_label/src/types/site-config.ts)
+- **Object**: `DEFAULT_SITE_CONFIG`
+
+## 4. Assets & Styling
+- **Logos**: Place default images in `/public`. Update `NEXT_PUBLIC_BRAND_LOGO` to point to them.
+- **Colors**: The theme is controlled via Tailwind + CSS variables.
+    - Edit `src/app/globals.css` to change the root color variables (`--brand-primary`, `--brand-secondary`, etc.) for a completely new color scheme.
+
+## 5. Deployment Steps (Vercel Example)
+1.  **Import Project**: Connect your Git repository to Vercel.
+2.  **Environment Config**: Copy the contents of your filled-out `.env.local` into Vercel's "Environment Variables" section.
+3.  **Deploy**: Click Deploy.
+4.  **Post-Deploy**:
+    - Go to your specific Firebase Console -> Firestore.
+    - Create a collection `config` and document `site` (optional, for dynamic overrides).
+    - **Security**: Deploy the security rules using `firebase deploy --only firestore:rules,storage:rules`.
+
+## 6. Accessing Admin Panel
+- Navigate to `/admin`
+- The implemented middleware (if active) and `AdminPROTECTOR` will require you to log in.
+- Ensure your user account has `role: 'admin'` in the `users` Firestore collection to access write features.
